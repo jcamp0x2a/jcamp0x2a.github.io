@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html><head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+
+    body { margin: 0px; overflow: hidden; }
+
+    #menu-container { position: absolute; bottom: 30px; right: 40px; }
+
+    #menu-content { position: absolute; bottom: 0px; right: 0px;
+                    display: none; background-color: #F5F5F5; border-bottom: 1px solid black;
+                    border-right: 1px solid black; border-left: 1px solid black; }
+
+    #menu-content div { border-top: 1px solid black; padding: 10px; white-space: nowrap; }
+
+    .animation-ui { position: absolute; top: 0; left: 0; opacity: 0.8;
+                    box-shadow: 2px 2px 4px darkgray; z-index: 1;
+                    border: 1px solid rgb(49, 49, 255); overflow: hidden; }
+
+    .animation-ui:hover { opacity: 1; }
+
+    .animation-ui .heading { margin: 0; height: 2em; line-height: 2em;
+                             font-size: 1em; padding: 0 5px; cursor: default;
+                             outline: none; user-select: none;
+                             background: rgb(49, 49, 255); color: white; }
+
+    .animation-ui.collapsed .heading { width: 2em; padding: 0; text-align: center; }
+
+    .animation-ui .heading::before { content: "▼ Animation Variables"; }
+
+    .animation-ui.collapsed .heading::before { content: "▶"; }
+
+    .animation-ui .container { resize: both; overflow: auto; background: #f5f5f5;
+                               min-width: 12em; max-width: calc(100vw - 3px);
+                               min-height: 1em; max-height: calc(100vh - 2em - 3px); }
+
+    .animation-ui.collapsed .container { display: none; }
+
+    .var-table { width: 100%; padding: 5px; }
+
+    .var-table td { width: 1px; white-space: nowrap; }
+
+    .name-col { text-align: right; font-style: italic; }
+
+    .playing .name-col var { text-decoration: underline; }
+
+    .value-col input { width: 5em; }
+
+    .slider-col { width: auto !important; }
+
+    .slider-col input { width: 100%; min-width: 120px; }
+
+    .buttons-col { padding-left: 5px; vertical-align: middle; }
+
+    .buttons-col button { color: rgb(49, 49, 255); user-select: none;
+                          width: 2em; height: 2em; vertical-align: middle; }
+
+    .playing button.play,
+    .paused button.pause,
+    .unplayable button.play,
+    .unplayable button.extras { display: none; }
+
+    .extras-menu { display: none; position: absolute; z-index: 2;
+                   background: #f5f5f5; outline: 1px solid lightgray;
+                   box-shadow: 2px 2px 4px darkgray; opacity: 0.8; }
+
+    .extras-menu.shown { display: block; }
+
+    .extras-menu:hover { opacity: 1; }
+
+    .extras-menu button { display: block; width: 100%; padding: 5px 5px 5px 0;
+                          text-align: left; border: none; outline: none;
+                          background: none; color: black; user-select: none; }
+
+    .extras-menu button:hover { color: rgb(49, 49, 255); }
+
+    .extras-menu button:active { background: rgb(49, 49, 255); color: white; }
+
+    .extras-menu span { display: inline-block; width: 2em; text-align: center; }
+
+    .extras-menu hr { margin: 0; border: none; border-top: 1px solid lightgray; }
+
+    .once button.once,
+    .repeat button.repeat,
+    .pingpong button.pingpong,
+    .forward button.forward,
+    .backward button.backward { background: rgb(49, 49, 255); color: white !important; }
+
+</style>
+</head>
+
+<body>
+
+<script src="/nbextensions/threejs/build/three.min.js"></script>
+<script src="/nbextensions/threejs/examples/js/controls/OrbitControls.js"></script>
+<script>
+  if ( !window.THREE ) document.write(' \
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/build/three.min.js"><\/script> \
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/examples/js/controls/OrbitControls.js"><\/script> \
+            ');
+</script>
+        
+<script>
+
+    var scene = new THREE.Scene();
+
+    var renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( 0xffffff, 1 );
+    document.body.appendChild( renderer.domElement );
+
+    var options = {"aspect_ratio": [1.0, 1.0, 1.0], "axes": false, "axes_labels": ["x", "y", "z"], "decimals": 2, "frame": true, "projection": "perspective", "animate": true, "animationVars": [{"name": "t", "keyValues": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0], "initial": null, "speed": 20.0, "loop": "pingpong", "autoPlay": true}], "allowAutoPlay": true};
+    var animate = options.animate && options.animationVars && options.animationVars.length > 0;
+
+    var b = [{"x":0.0, "y":0.0, "z":0.0}, {"x":1.9000000000000006, "y":1.3784048752090223, "z":3.610000000000002}]; // bounds
+
+    if ( b[0].x === b[1].x ) {
+        b[0].x -= 1;
+        b[1].x += 1;
+    }
+    if ( b[0].y === b[1].y ) {
+        b[0].y -= 1;
+        b[1].y += 1;
+    }
+    if ( b[0].z === b[1].z ) {
+        b[0].z -= 1;
+        b[1].z += 1;
+    }
+
+    var rRange = Math.sqrt( Math.pow( b[1].x - b[0].x, 2 )
+                            + Math.pow( b[1].y - b[0].y, 2 ) );
+    var xRange = b[1].x - b[0].x;
+    var yRange = b[1].y - b[0].y;
+    var zRange = b[1].z - b[0].z;
+
+    var ar = options.aspect_ratio;
+    var a = [ ar[0], ar[1], ar[2] ]; // aspect multipliers
+    var autoAspect = 2.5;
+    if ( zRange > autoAspect * rRange && a[2] === 1 ) a[2] = autoAspect * rRange / zRange;
+
+    // Distance from (xMid,yMid,zMid) to any corner of the bounding box, after applying aspect_ratio.
+    var midToCorner = Math.sqrt( a[0]*a[0]*xRange*xRange + a[1]*a[1]*yRange*yRange + a[2]*a[2]*zRange*zRange ) / 2;
+
+    var xMid = ( b[0].x + b[1].x ) / 2;
+    var yMid = ( b[0].y + b[1].y ) / 2;
+    var zMid = ( b[0].z + b[1].z ) / 2;
+
+    var box = new THREE.Geometry();
+    box.vertices.push( new THREE.Vector3( a[0]*b[0].x, a[1]*b[0].y, a[2]*b[0].z ) );
+    box.vertices.push( new THREE.Vector3( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) );
+    var boxMesh = new THREE.Line( box );
+    if ( options.frame ) scene.add( new THREE.BoxHelper( boxMesh, 'black' ) );
+
+    if ( options.axes_labels ) {
+
+        var d = options.decimals; // decimals
+        var offsetRatio = 0.1;
+        var al = options.axes_labels;
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var xm = xMid.toFixed(d);
+        if ( /^-0.?0*$/.test(xm) ) xm = xm.substr(1);
+        addLabel( al[0] + '=' + xm, a[0]*xMid, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[0].x ).toFixed(d), a[0]*b[0].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[1].x ).toFixed(d), a[0]*b[1].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[0]*( b[1].x - b[0].x );
+        var ym = yMid.toFixed(d);
+        if ( /^-0.?0*$/.test(ym) ) ym = ym.substr(1);
+        addLabel( al[1] + '=' + ym, a[0]*b[1].x+offset, a[1]*yMid, a[2]*b[0].z );
+        addLabel( ( b[0].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[0].y, a[2]*b[0].z );
+        addLabel( ( b[1].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[1].y, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var zm = zMid.toFixed(d);
+        if ( /^-0.?0*$/.test(zm) ) zm = zm.substr(1);
+        addLabel( al[2] + '=' + zm, a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*zMid );
+        addLabel( ( b[0].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[0].z );
+        addLabel( ( b[1].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[1].z );
+
+    }
+
+    function addLabel( text, x, y, z ) {
+
+        var fontsize = 14;
+
+        var canvas = document.createElement( 'canvas' );
+        var pixelRatio = Math.round( window.devicePixelRatio );
+        canvas.width = 128 * pixelRatio;
+        canvas.height = 32 * pixelRatio; // powers of two
+        canvas.style.width = '128px';
+        canvas.style.height = '32px';
+
+        var context = canvas.getContext( '2d' );
+        context.scale( pixelRatio, pixelRatio );
+        context.fillStyle = 'black';
+        context.font = fontsize + 'px monospace';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText( text, canvas.width/2/pixelRatio, canvas.height/2/pixelRatio );
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: texture } ) );
+        sprite.position.set( x, y, z );
+
+        // Set the initial scale based on plot size to accomodate orthographic projection.
+        // For other projections, the scale will get reset each frame based on camera distance.
+        var scale = midToCorner/2;
+        sprite.scale.set( scale, scale*.25 ); // ratio of canvas width to height
+
+        scene.add( sprite );
+
+        return sprite;
+
+    }
+
+    if ( options.axes ) scene.add( new THREE.AxesHelper( Math.min( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) ) );
+
+    var camera = createCamera();
+    camera.up.set( 0, 0, 1 );
+    camera.position.set( a[0]*(xMid+xRange), a[1]*(yMid+yRange), a[2]*(zMid+zRange) );
+
+    function createCamera() {
+
+        var aspect = window.innerWidth / window.innerHeight;
+
+        if ( options.projection === 'orthographic' ) {
+            var camera = new THREE.OrthographicCamera( -1, 1, 1, -1, -1000, 1000 );
+            updateCameraAspect( camera, aspect );
+            return camera;
+        }
+
+        return new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000 );
+
+    }
+
+    function updateCameraAspect( camera, aspect ) {
+
+        if ( camera.isPerspectiveCamera ) {
+            camera.aspect = aspect;
+        } else if ( camera.isOrthographicCamera ) {
+            // Fit the camera frustum to the bounding box's diagonal so that the entire plot fits
+            // within at the default zoom level and camera position.
+            if ( aspect > 1 ) { // Wide window
+                camera.top = midToCorner;
+                camera.right = midToCorner * aspect;
+            } else { // Tall or square window
+                camera.top = midToCorner / aspect;
+                camera.right = midToCorner;
+            }
+            camera.bottom = -camera.top;
+            camera.left = -camera.right;
+        }
+
+        camera.updateProjectionMatrix();
+
+    }
+
+    var lights = [{"x":-5, "y":3, "z":0, "color":"#7f7f7f", "parent":"camera"}];
+    for ( var i=0 ; i < lights.length ; i++ ) {
+        var light = new THREE.DirectionalLight( lights[i].color, 1 );
+        light.position.set( a[0]*lights[i].x, a[1]*lights[i].y, a[2]*lights[i].z );
+        if ( lights[i].parent === 'camera' ) {
+            light.target.position.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+            scene.add( light.target );
+            camera.add( light );
+        } else scene.add( light );
+    }
+    scene.add( camera );
+
+    var ambient = {"color":"#7f7f7f"};
+    scene.add( new THREE.AmbientLight( ambient.color, 1 ) );
+
+    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.target.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+    controls.addEventListener( 'change', function() { if ( !animate ) render(); } );
+
+    window.addEventListener( 'resize', function() {
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        updateCameraAspect( camera, window.innerWidth / window.innerHeight );
+        if ( !animate ) render();
+
+    } );
+
+    var texts = [];
+    for ( var i=0 ; i < texts.length ; i++ ) addText( texts[i] );
+
+    function addText( json ) {
+        var sprite = addLabel( json.text, a[0]*json.x, a[1]*json.y, a[2]*json.z );
+        if ( json.animationKeys )
+            sprite.userData = { "animationKeys": json.animationKeys };
+    }
+
+    var points = [{"point":[0.0, 0.0, 0.0], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 0}},{"point":[0.1, 0.31622776601683794, 0.010000000000000002], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 1}},{"point":[0.2, 0.4472135954999579, 0.04000000000000001], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 2}},{"point":[0.30000000000000004, 0.5477225575051662, 0.09000000000000002], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 3}},{"point":[0.4, 0.6324555320336759, 0.16000000000000003], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 4}},{"point":[0.5, 0.7071067811865476, 0.25], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 5}},{"point":[0.6, 0.7745966692414834, 0.36], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 6}},{"point":[0.7, 0.8366600265340756, 0.48999999999999994], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 7}},{"point":[0.7999999999999999, 0.8944271909999159, 0.6399999999999999], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 8}},{"point":[0.8999999999999999, 0.9486832980505138, 0.8099999999999998], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 9}},{"point":[0.9999999999999999, 0.9999999999999999, 0.9999999999999998], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 10}},{"point":[1.0999999999999999, 1.0488088481701514, 1.2099999999999997], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 11}},{"point":[1.2, 1.0954451150103321, 1.44], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 12}},{"point":[1.3, 1.140175425099138, 1.6900000000000002], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 13}},{"point":[1.4000000000000001, 1.1832159566199232, 1.9600000000000004], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 14}},{"point":[1.5000000000000002, 1.2247448713915892, 2.250000000000001], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 15}},{"point":[1.6000000000000003, 1.2649110640673518, 2.560000000000001], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 16}},{"point":[1.7000000000000004, 1.30384048104053, 2.8900000000000015], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 17}},{"point":[1.8000000000000005, 1.341640786499874, 3.2400000000000015], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 18}},{"point":[1.9000000000000006, 1.3784048752090223, 3.610000000000002], "size":20, "color":"blue", "opacity":1.0, "animationKeys":{"t": 19}}];
+    for ( var i=0 ; i < points.length ; i++ ) addPoint( points[i] );
+
+    function addPoint( json ) {
+
+        var geometry = new THREE.Geometry();
+        var v = json.point;
+        geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = 128;
+        canvas.height = 128;
+
+        var context = canvas.getContext( '2d' );
+        context.arc( 64, 64, 64, 0, 2 * Math.PI );
+        context.fillStyle = json.color;
+        context.fill();
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var transparent = json.opacity < 1 ? true : false;
+        var size = camera.isOrthographicCamera ? json.size : json.size/100;
+        var material = new THREE.PointsMaterial( { size: size, map: texture,
+                                                   transparent: transparent, opacity: json.opacity,
+                                                   alphaTest: .1 } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Points( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        scene.add( mesh );
+
+        if ( json.animationKeys )
+            mesh.userData = { "animationKeys": json.animationKeys };
+
+    }
+
+    var lines = [];
+    for ( var i=0 ; i < lines.length ; i++ ) addLine( lines[i] );
+
+    function addLine( json ) {
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.points.length ; i++ ) {
+            var v = json.points[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+        }
+
+        var transparent = json.opacity < 1 ? true : false;
+        var material = new THREE.LineBasicMaterial( { color: json.color, linewidth: json.linewidth,
+                                                      transparent: transparent, opacity: json.opacity } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Line( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        scene.add( mesh );
+
+        if ( json.animationKeys )
+            mesh.userData = { "animationKeys": json.animationKeys };
+
+    }
+
+    var surfaces = [];
+    for ( var i=0 ; i < surfaces.length ; i++ ) addSurface( surfaces[i] );
+
+    function addSurface( json ) {
+
+        var useFaceColors = 'faceColors' in json ? true : false;
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.vertices.length ; i++ ) {
+            var v = json.vertices[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v.x, a[1]*v.y, a[2]*v.z ) );
+        }
+        for ( var i=0 ; i < json.faces.length ; i++ ) {
+            var f = json.faces[i];
+            for ( var j=0 ; j < f.length - 2 ; j++ ) {
+                var face = new THREE.Face3( f[0], f[j+1], f[j+2] );
+                if ( useFaceColors ) face.color.set( json.faceColors[i] );
+                geometry.faces.push( face );
+            }
+        }
+        geometry.computeVertexNormals();
+
+        var side = json.singleSide ? THREE.FrontSide : THREE.DoubleSide;
+        var transparent = json.opacity < 1 ? true : false;
+
+        var material = new THREE.MeshPhongMaterial( { side: side,
+                                     color: useFaceColors ? 'white' : json.color,
+                                     vertexColors: useFaceColors ? THREE.FaceColors : THREE.NoColors,
+                                     transparent: transparent, opacity: json.opacity,
+                                     shininess: 20, flatShading: json.useFlatShading } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        if ( transparent && json.renderOrder ) mesh.renderOrder = json.renderOrder;
+        scene.add( mesh );
+
+        if ( json.animationKeys )
+            mesh.userData = { "animationKeys": json.animationKeys };
+
+        if ( json.showMeshGrid ) {
+
+            var geometry = new THREE.Geometry();
+
+            for ( var i=0 ; i < json.faces.length ; i++ ) {
+                var f = json.faces[i];
+                for ( var j=0 ; j < f.length ; j++ ) {
+                    var k = j === f.length-1 ? 0 : j+1;
+                    var v1 = json.vertices[f[j]];
+                    var v2 = json.vertices[f[k]];
+                    // vertices in opposite directions on neighboring faces
+                    var nudge = f[j] < f[k] ? .0005*zRange : -.0005*zRange;
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v1.x, a[1]*v1.y, a[2]*(v1.z+nudge) ) );
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v2.x, a[1]*v2.y, a[2]*(v2.z+nudge) ) );
+                }
+            }
+
+            var material = new THREE.LineBasicMaterial( { color: 'black', linewidth: 1 } );
+
+            var c = new THREE.Vector3();
+            geometry.computeBoundingBox();
+            geometry.boundingBox.getCenter( c );
+            geometry.translate( -c.x, -c.y, -c.z );
+
+            var mesh = new THREE.LineSegments( geometry, material );
+            mesh.position.set( c.x, c.y, c.z );
+            scene.add( mesh );
+
+            if ( json.animationKeys )
+                mesh.userData = { "animationKeys": json.animationKeys };
+
+        }
+
+    }
+
+    var scratch = new THREE.Vector3();
+
+    if ( animate )
+        var updateScene = initAnimation( options.animationVars, options.allowAutoPlay );
+
+    function render() {
+
+        if ( animate ) {
+            requestAnimationFrame( render );
+            updateScene( scene );
+        }
+
+        renderer.render( scene, camera );
+
+        // Resize text based on distance from camera.
+        // Not neccessary for orthographic due to the nature of the projection (preserves sizes).
+        if ( !camera.isOrthographicCamera ) {
+            for ( var i=0 ; i < scene.children.length ; i++ ) {
+                if ( scene.children[i].type === 'Sprite' ) {
+                    var sprite = scene.children[i];
+                    var adjust = scratch.addVectors( sprite.position, scene.position )
+                                    .sub( camera.position ).length() / 5;
+                    sprite.scale.set( adjust, .25*adjust ); // ratio of canvas width to height
+                }
+            }
+        }
+    }
+
+    render();
+    controls.update();
+    if ( !animate ) render();
+
+
+    // menu functions
+
+    function toggleMenu() {
+
+        var m = document.getElementById( 'menu-content' );
+        if ( m.style.display === 'block' ) m.style.display = 'none'
+        else m.style.display = 'block';
+
+    }
+
+
+    function saveAsPNG() {
+
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = renderer.domElement.toDataURL( 'image/png' );
+        a.download = 'screenshot';
+        a.click();
+
+    }
+
+    function saveAsHTML() {
+
+        toggleMenu(); // otherwise visible in output
+        event.stopPropagation();
+
+        var blob = new Blob( [ '<!DOCTYPE html>\n' + document.documentElement.outerHTML ] );
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = window.URL.createObjectURL( blob );
+        a.download = 'graphic.html';
+        a.click();
+
+    }
+
+    function getViewpoint() {
+
+        var info = '<pre>' + JSON.stringify( camera, null, '\t' ) + '</pre>';
+        window.open().document.write( info );
+
+    }
+
+    // Animation
+
+    function initAnimation( animationVars, allowAutoPlay ) {
+
+        // We're assuming that Sage has ensured that...
+        // - the names of animation variables are unique,
+        // - each variable contains at least two key values,
+        // - the key values are sorted ascending, and
+        // - the key values contain no duplicates.
+        setupAnimationVars( animationVars );
+
+        if ( !document.readyState || document.readyState === 'loading' ) {
+            document.addEventListener('DOMContentLoaded', onDocumentReady);
+        } else {
+            onDocumentReady();
+        }
+
+        return updateScene;
+
+        function onDocumentReady() {
+
+            // When using the "Save as HTML" menu option, the current state of the
+            // animation UI is included in the output. In case we're running in such
+            // an output file, make sure the old UI is gone before creating a new one
+            // so we don't end up with two of them!
+            destroyAnimationUi();
+
+            var animationUi = createAnimationUi( animationVars );
+            document.body.appendChild( animationUi );
+
+            if ( allowAutoPlay ) animationVars.autoPlay();
+
+            if ( animationVars.length == 1 && animationVars[0].playing ) {
+                // For convenience in the very common use case of a single variable
+                // set to auto-play, get the UI out of the way so the user can focus
+                // on the plot.
+                animationUi.collapse();
+            }
+
+        }
+
+        function updateScene( scene ) {
+            animationVars.update();
+            updateAnimatedScene( scene, animationVars );
+        }
+
+    }
+
+    function setupAnimationVars( animationVars ) {
+
+        animationVars.byName = {};
+
+        for ( var i=0; i < animationVars.length ; i++ ) {
+            var avar = animationVars[i];
+            avar.index = i;
+            animationVars.byName[avar.name] = avar;
+            setupAnimationVar( avar );
+        }
+
+        var clock = null;
+        animationVars.update = function() {
+            if ( clock ) {
+                var deltaTime = clock.getDelta(); // seconds
+                for ( var j=0 ; j < animationVars.length ; j++ )
+                    animationVars[j].update( deltaTime );
+            } else {
+                // First time through just create the clock. No need to do any
+                // updates since deltaTime would = 0.
+                clock = new THREE.Clock();
+            }
+        };
+
+        animationVars.autoPlay = function() {
+
+            var anyPlaying = false;
+            var firstToPlay = null;
+
+            for ( var i=0 ; i < animationVars.length ; i++ ) {
+                var avar = animationVars[i];
+                // Make sure it's playable AND the user hasn't explicitly forbidden
+                // auto-playing it.
+                if ( avar.playable && avar.autoPlay !== false ) {
+                    if ( avar.autoPlay ) {
+                        avar.play();
+                        anyPlaying = true;
+                    } else if ( !firstToPlay ) {
+                        firstToPlay = avar;
+                    }
+                }
+            }
+
+            // If no variables were set to auto-play, play the first one we can.
+            if ( !anyPlaying && firstToPlay ) firstToPlay.play();
+
+        }
+
+    }
+
+    function setupAnimationVar( avar ) {
+
+        avar.min = avar.keyValues[0];
+        avar.max = avar.keyValues[avar.keyValues.length - 1];
+        avar.range = avar.max - avar.min;
+
+        if ( typeof( avar.initial ) !== 'number' )
+            avar.initial = avar.min;
+        avar.value = clamp( avar.initial );
+        updateKeyIndex();
+
+        if ( typeof( avar.speed ) !== 'number' )
+            avar.speed = avar.max - avar.min;
+
+        if ( avar.loop !== 'once' && avar.loop !== 'pingpong' )
+            avar.loop = 'repeat';
+
+        avar.playable = avar.speed != 0;
+        avar.playing = false;
+
+        avar.play = function() {
+
+            if ( !avar.playable ) return;
+
+            if ( avar.loop === 'once' ) {
+                // Wrap back around. Otherwise, the animation has no where to go.
+                if ( avar.speed < 0 && avar.value == avar.min )
+                    avar.seek( avar.max );
+                else if ( avar.speed > 0 && avar.value == avar.max )
+                    avar.seek( avar.min );
+            }
+
+            avar.playing = true;
+            if ( avar.ui ) avar.ui.update();
+
+        };
+
+        avar.pause = function() {
+            avar.playing = false;
+            if ( avar.ui ) avar.ui.update();
+        };
+
+        avar.seek = function( value ) {
+            avar.value = clamp( value );
+            updateKeyIndex();
+            if ( avar.ui ) avar.ui.update();
+        };
+
+        avar.setLoop = function( loop ) {
+            if ( loop === 'once' || loop === 'repeat' || loop === 'pingpong' )
+                avar.loop = loop;
+            if ( avar.ui ) avar.ui.update();
+        };
+
+        avar.setDirection = function( direction ) {
+            if ( Math.sign( avar.speed ) != Math.sign( direction ) )
+                avar.speed = -avar.speed;
+            if ( avar.ui ) avar.ui.update();
+        };
+
+        avar.faster = function() { avar.speed *= 1.5; };
+        avar.slower = function() { avar.speed /= 1.5; };
+
+        avar.update = function( deltaTime ) {
+
+            if ( !avar.playing ) return;
+
+            var newValue = avar.value + avar.speed * deltaTime;
+
+            if ( newValue < avar.min || newValue > avar.max ) {
+                if ( avar.loop === 'repeat' ) newValue = wrap( newValue );
+                else if ( avar.loop === 'pingpong' ) avar.speed = -avar.speed;
+                else if ( avar.loop === 'once' ) avar.playing = false;
+            }
+
+            avar.seek( newValue );
+
+            if ( avar.ui ) avar.ui.update();
+
+        };
+
+        function clamp( x ) {
+            return Math.max( avar.min, Math.min( avar.max, x ) );
+        }
+
+        function wrap( x ) {
+            return x - avar.range * Math.floor( ( x - avar.min ) / avar.range );
+        }
+
+        function calculateKeyIndex( value, startIndex ) {
+
+            if ( value == avar.min ) return 0;
+            if ( value == avar.max ) return avar.keyValues.length - 1;
+
+            startIndex = startIndex || 0;
+
+            for ( var i=startIndex ; i < avar.keyValues.length ; i++ )
+                if ( value >= avar.keyValues[i] && value < avar.keyValues[i+1] )
+                    return i;
+
+            for ( var i=0 ; i < startIndex; i++ )
+                if ( value >= avar.keyValues[i] && value < avar.keyValues[i+1] )
+                    return i;
+
+            return startIndex; // Should never get to this point!
+
+        }
+
+        function updateKeyIndex() {
+            avar.keyIndex = calculateKeyIndex( avar.value, avar.keyIndex );
+        }
+
+    }
+
+    function updateAnimatedScene( scene, animationVars ) {
+
+        for ( var i=0 ; i < scene.children.length ; i++ ) {
+            var obj = scene.children[i];
+            if ( obj.userData && obj.userData.animationKeys ) {
+                obj.visible = animationKeysSatisfied( obj.userData.animationKeys );
+            }
+        }
+
+        // Each entry in animationKeys maps a variable name to an index in that
+        // animated variable's list of key values. An object should only be
+        // drawn if all of these indices match the current animation indices.
+        function animationKeysSatisfied( animationKeys ) {
+            for ( var name in animationKeys ) {
+                var keyIndex = animationKeys[name];
+                var avar = animationVars.byName[name];
+                if ( !avar || avar.keyIndex !== keyIndex ) return false;
+            }
+            return true;
+        }
+
+    }
+
+    function destroyAnimationUi() {
+        var ui = document.getElementById( 'animation-ui' );
+        if (ui) ui.parentNode.removeChild(ui);
+    }
+
+    function createAnimationUi( animationVars ) {
+
+        var ui = document.createElement( 'div' );
+        ui.id = 'animation-ui';
+        ui.classList.add( 'animation-ui' );
+
+        ui.expand = function() { ui.classList.remove( 'collapsed' ); }
+
+        ui.collapse = function() {
+            hideAllVarExtrasMenus();
+            ui.classList.add( 'collapsed' );
+        }
+
+        ui.toggle = function() {
+            ( ui.classList.contains( 'collapsed' ) ? ui.expand : ui.collapse )();
+        }
+
+        var heading = document.createElement( 'h1' );
+        heading.classList.add( 'heading' );
+        heading.setAttribute( 'title', "Show/hide the animation variables panel." );
+        heading.onclick = ui.toggle;
+        ui.appendChild( heading );
+
+        var content = document.createElement( 'div' );
+        content.classList.add( 'container' );
+        ui.appendChild( content );
+
+        var table = document.createElement( 'table' );
+        table.classList.add( 'var-table' );
+        content.appendChild( table );
+
+        var rows = [];
+
+        for ( var r=0 ; r < animationVars.length ; r++ ) {
+            var row = createVarRow( animationVars[r] );
+            rows.push( row );
+            table.appendChild( row );
+        }
+
+        ui.update = function() {
+            for ( var r=0 ; r < rows.length ; r++ ) rows[r].update();
+        };
+        ui.update();
+
+        animationVars.ui = ui;
+
+        return ui;
+
+    }
+
+    function createVarRow( animationVar ) {
+
+        var row = document.createElement( 'tr' );
+
+        var nameCol = createVarNameCol( animationVar );
+        var valueCol = createVarValueCol( animationVar );
+        var sliderCol = createVarSliderCol( animationVar );
+        var buttonsCol = createVarButtonsCol( animationVar );
+
+        row.appendChild( nameCol );
+        row.appendChild( valueCol );
+        row.appendChild( sliderCol );
+        row.appendChild( buttonsCol );
+
+        row.update = function() {
+            valueCol.update();
+            sliderCol.update();
+            buttonsCol.update();
+        };
+
+        animationVar.ui = row;
+
+        return row;
+
+    }
+
+    function createVarNameCol( animationVar ) {
+
+        var col = document.createElement( 'td' );
+        col.classList.add( 'name-col' );
+
+        var label = document.createElement( 'label' );
+        label.setAttribute( 'for', 'var-value-' + animationVar.index );
+        col.appendChild( label );
+
+        var _var = document.createElement( 'var' );
+        _var.appendChild( document.createTextNode( animationVar.name ) );
+        label.appendChild( _var );
+
+        label.appendChild( document.createTextNode( " = " ) );
+
+        return col;
+
+    }
+
+    function createVarValueCol( animationVar ) {
+
+        var col = document.createElement( 'td' );
+        col.classList.add( 'value-col' );
+
+        var textbox = document.createElement( 'input' );
+        textbox.id = 'var-value-' + animationVar.index;
+        textbox.setAttribute( 'type', 'text' );
+        textbox.value = animationVar.value;
+        textbox.onblur = function() {
+            var newValue = parseFloat( textbox.value );
+            if ( isNaN( newValue ) ) textbox.value = animationVar.value;
+            else animationVar.seek( newValue );
+        }
+        col.appendChild( textbox );
+
+        col.update = function() { textbox.value = animationVar.value; };
+
+        return col;
+
+    }
+
+    function createVarSliderCol( animationVar ) {
+
+        var col = document.createElement( 'td' );
+        col.classList.add( 'slider-col' );
+
+        if ( !Number.MAX_SAFE_INTEGER )
+            Number.MAX_SAFE_INTEGER = 9007199254740991; // 2^53 - 1
+
+        var slider = document.createElement( 'input' );
+        slider.setAttribute( 'type', 'range' );
+        slider.setAttribute( 'min', 0 );
+        slider.setAttribute( 'max', Number.MAX_SAFE_INTEGER );
+        slider.setAttribute( 'step', '1' );
+        slider.setAttribute( 'list', 'key-values-' + animationVar.index );
+        slider.value = varToSlider( animationVar.value );
+        slider.oninput = function() {
+            animationVar.seek( sliderToVar( slider.value ) );
+        };
+        slider.onchange = slider.oninput;
+        col.appendChild( slider );
+
+        var datalist = document.createElement( 'datalist' );
+        datalist.id = 'key-values-' + animationVar.index;
+        col.appendChild( datalist );
+
+        for ( var i=0 ; i < animationVar.keyValues.length ; i++ ) {
+            var option = document.createElement( 'option' );
+            option.value = varToSlider( animationVar.keyValues[i] );
+            datalist.appendChild( option );
+        }
+
+        col.update = function() {
+            slider.value = varToSlider( animationVar.value );
+        };
+
+        return col;
+
+        // Browsers seem to be a bit finicky with slider values past a certain number
+        // of decimal digits, even when setting step="any", resulting in bugs like not
+        // being able to slide all the way to the endpoint values. To side-step these,
+        // we just use non-negative integers for the slider's value, which browsers
+        // seem to handle much more consistently.
+
+        function sliderToVar( value ) {
+            var progress = value / Number.MAX_SAFE_INTEGER; // in [0,1]
+            return animationVar.min + animationVar.range * progress; // now in [min,max]
+        }
+
+        function varToSlider( value ) {
+            var progress = ( value - animationVar.min ) / animationVar.range; // in [0,1]
+            progress = Math.max( 0, Math.min( 1, progress ) ); // just to be sure it's ^
+            return Math.round(progress * Number.MAX_SAFE_INTEGER);
+        }
+
+    }
+
+    function createVarButtonsCol( animationVar ) {
+
+        var col = document.createElement( 'td' );
+        col.classList.add( 'buttons-col' );
+
+        addButton( 'play', "▶", "Play", animationVar.play );
+        addButton( 'pause', "❚❚", "Pause", animationVar.pause );
+
+        var extrasButton = addButton( 'extras', "≡", "Additional options" );
+        var extrasMenu = createVarExtrasMenu( animationVar, extrasButton );
+        extrasButton.onclick = extrasMenu.toggle;
+
+        col.update = function() {
+            col.classList.remove( 'playable', 'unplayable', 'playing', 'paused' );
+            col.classList.add( animationVar.playable ? 'playable' : 'unplayable' )
+            col.classList.add( animationVar.playing ? 'playing' : 'paused' );
+            extrasMenu.update();
+        };
+
+        return col;
+
+        function addButton( _class, text, tooltip, onclick ) {
+            var button = document.createElement( 'button' );
+            button.classList.add( _class );
+            button.setAttribute( 'type', 'button' );
+            button.setAttribute( 'title', tooltip );
+            button.onclick = onclick;
+            button.appendChild( document.createTextNode( text ) );
+            col.appendChild(button);
+            return button;
+        }
+
+    }
+
+    function createVarExtrasMenu( animationVar, showBeneath ) {
+
+        var menu = document.createElement( 'div' );
+        menu.classList.add( 'extras-menu' );
+        document.body.appendChild( menu );
+
+        addLoopButton( 'once', "×1", "Play once" );
+        addLoopButton( 'repeat', "∞", "Repeat" );
+        addLoopButton( 'pingpong', "↹", "Ping-pong" );
+        addSeparator();
+        addDirectionButton( 'forward', "→", "Play forwards", +1 );
+        addDirectionButton( 'backward', "←", "Play backwards", -1 );
+        addSeparator();
+        addButton( 'faster', "+", "Increase speed", animationVar.faster );
+        addButton( 'slower', "-", "Decrease speed", animationVar.slower );
+
+        menu.show = function() {
+
+            hideAllVarExtrasMenus();
+
+            // The menu style's `right` is distance from right edge of window
+            // to menu's right edge. The rect's `right` is distance from the left
+            // edge of the window to the right edge of the `showBeneath` element.
+            var rect = showBeneath.getBoundingClientRect();
+            menu.style.right = ( window.innerWidth - rect.right ) + 'px';
+            menu.style.top = rect.bottom + 'px';
+
+            menu.classList.add( 'shown' );
+
+        };
+
+        menu.hide = function() { menu.classList.remove( 'shown' ); }
+
+        menu.toggle = function() {
+            ( menu.classList.contains( 'shown' ) ? menu.hide : menu.show )();
+        };
+
+        menu.update = function() {
+            menu.classList.remove( 'once', 'repeat', 'pingpong', 'forward', 'backward' );
+            menu.classList.add( animationVar.loop );
+            menu.classList.add( animationVar.speed > 0 ? 'forward' : 'backward' );
+        };
+
+        return menu;
+
+        function addButton( _class, shortText, longText, onclick ) {
+
+            var button = document.createElement( 'button' );
+            button.classList.add( _class );
+            button.setAttribute( 'type', 'button' );
+            button.onclick = onclick;
+            menu.appendChild( button );
+
+            var span = document.createElement( 'span' );
+            span.appendChild( document.createTextNode( shortText ) );
+            button.appendChild( span );
+
+            button.appendChild( document.createTextNode( longText ) );
+
+            return button;
+
+        }
+
+        function addLoopButton( loopMode, shortText, longText ) {
+            var onclick = function() { animationVar.setLoop( loopMode ); };
+            return addButton( loopMode, shortText, longText, onclick );
+        }
+
+        function addDirectionButton( _class, shortText, longText, direction ) {
+            var onclick = function() { animationVar.setDirection( direction ); }
+            return addButton( _class, shortText, longText, onclick );
+        }
+
+        function addSeparator() {
+            var hr = document.createElement( 'hr' );
+            menu.appendChild( hr );
+            return hr;
+        }
+
+    }
+
+    function hideAllVarExtrasMenus() {
+        var menus = document.getElementsByClassName( 'extras-menu' );
+        for ( var i=0 ; i < menus.length ; i++ ) {
+            menus[i].classList.remove( 'shown' );
+        }
+    }
+
+</script><canvas width="2460" height="1000" tabindex="0" style="width: 984px; height: 400px;"></canvas>
+
+<div id="menu-container" onclick="toggleMenu()">ⓘ
+<div id="menu-content" style="display: none;">
+<div onclick="saveAsPNG()">Save as PNG</div>
+<div onclick="saveAsHTML()">Save as HTML</div>
+<div onclick="getViewpoint()">Camera Info</div>
+<div>Close Menu</div>
+</div></div>
+
+
+
+<div class="extras-menu pingpong forward"><button class="once" type="button"><span>×1</span>Play once</button><button class="repeat" type="button"><span>∞</span>Repeat</button><button class="pingpong" type="button"><span>↹</span>Ping-pong</button><hr><button class="forward" type="button"><span>→</span>Play forwards</button><button class="backward" type="button"><span>←</span>Play backwards</button><hr><button class="faster" type="button"><span>+</span>Increase speed</button><button class="slower" type="button"><span>-</span>Decrease speed</button></div><div id="animation-ui" class="animation-ui collapsed"><h1 class="heading" title="Show/hide the animation variables panel."></h1><div class="container"><table class="var-table"><tr><td class="name-col"><label for="var-value-0"><var>t</var> = </label></td><td class="value-col"><input id="var-value-0" type="text"></td><td class="slider-col"><input type="range" min="0" max="9007199254740991" step="1" list="key-values-0"><datalist id="key-values-0"><option value="0"></option><option value="474063118670578"></option><option value="948126237341157"></option><option value="1422189356011735"></option><option value="1896252474682314"></option><option value="2370315593352892"></option><option value="2844378712023471"></option><option value="3318441830694049"></option><option value="3792504949364628"></option><option value="4266568068035206"></option><option value="4740631186705784"></option><option value="5214694305376363"></option><option value="5688757424046941"></option><option value="6162820542717520"></option><option value="6636883661388098"></option><option value="7110946780058677"></option><option value="7585009898729255"></option><option value="8059073017399834"></option><option value="8533136136070412"></option><option value="9007199254740991"></option></datalist></td><td class="buttons-col playable playing"><button class="play" type="button" title="Play">▶</button><button class="pause" type="button" title="Pause">❚❚</button><button class="extras" type="button" title="Additional options">≡</button></td></tr></table></div></div></body></html>
