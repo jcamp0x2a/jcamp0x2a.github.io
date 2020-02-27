@@ -121,7 +121,7 @@ class AnimationSystem {
         // - the key values are sorted ascending, and
         // - the key values contain no duplicates.
         //
-        this.options = {"variables": [{"key_values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "display_name": "t", "initial": null, "speed": 5.0, "loop": "repeat", "auto_play": true, "id": 139958127955400, "name": "t", "keyValues": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "autoPlay": true}], "allowAutoPlay": true};
+        this.options = {"variables": [{"key_values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "display_name": "t", "initial": null, "speed": 5.0, "loop": "repeat", "auto_play": true, "id": 140242506608928, "name": "t", "keyValues": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "autoPlay": true}], "allowAutoPlay": true};
 
         this.state = new AnimationState( this.options.variables, renderCallback );
         this.scene = new AnimatedScene( scene, this.state );
@@ -588,11 +588,8 @@ class AnimTextboxColumn {
         this.input.setAttribute( 'type', 'text' );
         this.input.value = animationVar.value;
         this.input.onblur = () => this.seek();
-        this.input.onkeyup = event => {
-            if ( event.key === 'Enter' ) {
-                event.preventDefault();
-                this.seek();
-            }
+        this.input.onkeydown = event => {
+            if ( this.seekUsingKey( event.key ) ) event.preventDefault();
         };
         td.appendChild( this.input );
 
@@ -602,6 +599,22 @@ class AnimTextboxColumn {
         let newValue = parseFloat( this.input.value );
         if ( isNaN( newValue ) ) this.input.value = this.animationVar.value;
         else this.animationVar.seek( newValue );
+    }
+
+    seekUsingKey( key ) {
+        switch ( key ) {
+            case 'Enter':
+                this.seek();
+                return true;
+            case 'Up':
+            case 'ArrowUp':
+                this.animationVar.gotoNextKeyValue();
+                return true;
+            case 'Down':
+            case 'ArrowDown':
+                this.animationVar.gotoPreviousKeyValue();
+                return true;
+        }
     }
 
     update() {
@@ -1246,7 +1259,7 @@ class AnimExtrasMenu {
 
     }
 
-</script><canvas width="2460" height="1000" tabindex="0" style="width: 984px; height: 400px;"></canvas>
+</script><canvas width="2460" height="1000" style="width: 984px; height: 400px;" tabindex="0"></canvas>
 
 <div id="menu-container" onclick="toggleMenu()">ⓘ
 <div id="menu-content" style="display: none;">
