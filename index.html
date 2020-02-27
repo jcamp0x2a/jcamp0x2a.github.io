@@ -2,46 +2,88 @@
 <html>
 <title>Three.js Animation Examples</title>
 <body>
-<h3><a href="graphic1.html">Example 1a</a> (point animation)</h3>
+
+<h3><a href="moving_point1.html">A moving point using animate3d</a></h3>
 <pre>
-animated_plot3d(
-    lambda t: point3d((sin(t), cos(t), sin(t)*cos(t)), size=20),
-    t=anim_var([0,pi/16,..,2*pi], speed=pi)
-)
+sage: p(u) = (sin(u), cos(u), sin(u)*cos(u))
+sage: frames = [point3d(p(u)) for u in (0,pi/16,..,2*pi)]
+sage: animate3d(frames)
+Graphics3d Object
 </pre>
-<h3><a href="graphic1.html">Example 1b</a> (behind scenes of animated_plot3d and anim_var)</h3>
+
+<h3><a href="moving_point2.html">Frames of motion</a></h3>
 <pre>
-def mypoint(t, index):
-    p = point3d((sin(t), cos(t), sin(t)*cos(t)), size=20)
-    p.animation_keys({'t': index})
-    return p
-indices = list(range(0, 33))
-ts = [i * pi/16 for i in indices]
-g = sum([mypoint(t, index) for t, index in zip(ts, indices)])
-g.animation_vars({'t': AnimationVariable(ts, speed=pi)})
-show(g)
+sage: show(animate3d(frames), animate=False)
 </pre>
-<h3><a href="graphic2.html">Example 2</a> (parametric curve animation)</h3>
+
+<h3><a href="moving_point3.html">More options for animate3d</a></h3>
 <pre>
-def myplot(t, ampl=1, x0=-2*pi, x1=2*pi):
-    p1 = parametric_plot3d([ampl*sin(x-t),0,x], (x,x0,x1), color='red')  
-    p2 = parametric_plot3d([0,-ampl*sin(x-t),x], (x,x0,x1), color='green')
-    return p1 + p2
-curve_plot = animated_plot3d(myplot, ampl=2, t=anim_var(0,pi/16,..,2*pi))
-show(curve_plot, projection='orthographic')
+sage: animate3d(frames, delay=10, loop='once', auto_play=False, var_name='u')
+Graphics3d Object
 </pre>
-<h3><a href="graphic3.html">Example 3</a> (surface animation with multiple animation variables)</h3>
+
+<h3><a href="polar_plot.html">Animating 2D plots</a></h3>
 <pre>
-var('theta,phi')
-def draw_torus(R, r):
-    return parametric_plot3d(
-        [(R + r*cos(theta)) * cos(phi), (R + r*cos(theta)) * sin(phi), r*sin(theta)],
-        (theta,0,2*pi), (phi,0,2*pi))
-animated_plot3d(draw_torus, R=anim_var(0.2,0.4,..2), r=anim_var(0.2,0.4,..,2))
+sage: frames = [None] + [polar_plot(sin(5*x)^2, (x, 0, t)) for t in (pi/32,pi/16,..,2*pi)]
+sage: animate3d(frames, delay=5) # long time
+Graphics3d Object
 </pre>
-<h3><a href="graphic4.html">Example 4</a> (animate3d similar to the regular animate; takes a list of frames)</h3>
+
+<h3><a href="moving_sine1.html">Moving sine wave using animated_plot3d</a></h3>
 <pre>
-animate3d([point3d((x,sqrt(x),x^2), size=20) for x in xsrange(0,2,0.1)], delay=5, loop='pingpong')
+sage: def moving_sine(t):
+....:     return parametric_plot3d([sin(x-t), 0, x], (x, 0, 4*pi))
+sage: animated_plot3d(moving_sine, t=anim_var(0, pi/16, .., 2*pi))
+Graphics3d Object
 </pre>
+
+<h3><a href="moving_sine2.html">More options for animation variables</a></h3>
+<pre>
+sage: animated_plot3d(moving_sine, t=anim_var(
+....:     'u', [0, pi/16, .., 2*pi], initial=pi, loop='pingpong',
+....:     speed=pi, auto_play=False))
+Graphics3d Object
+</pre>
+
+<h3><a href="combo1.html">Combining animated plots</a></h3>
+<pre>
+sage: def moving_sine2(t):
+....:     return parametric_plot3d([0, -sin(x-t), x], (x, 0, 4*pi), color='red')
+sage: plot1 = animated_plot3d(moving_sine, t=anim_var(
+....:             [0, pi/16, .., 2*pi], auto_play=True, speed=pi))
+sage: plot2 = animated_plot3d(moving_sine2, t=anim_var(
+....:             [0, pi/16, .., 2*pi], auto_play=True, speed=-pi))
+sage: show(plot1 + plot2, projection='orthographic')
+</pre>
+
+<h3><a href="combo2.html">Sharing animation variables</a></h3>
+<pre>
+sage: t_var = anim_var([0, pi/16, .., 2*pi], auto_play=True, speed=pi)
+sage: plot1 = animated_plot3d(moving_sine, t_var)
+sage: plot2 = animated_plot3d(moving_sine2, t_var)
+sage: show(plot1 + plot2, projection='orthographic')
+</pre>
+
+<h3><a href="torus.html">Preventing playback of animation variables</a></h3>
+<pre>
+sage: theta, phi = var('theta,phi')
+sage: def draw_torus(R, r):
+....:     return parametric_plot3d(
+....:         [(R + r*cos(theta)) * cos(phi), (R + r*cos(theta)) * sin(phi), r*sin(theta)],
+....:        (theta, 0, 2*pi), (phi, 0, 2*pi))
+sage: R_var = anim_var([0.2, 0.4, .., 2], speed=0)
+sage: r_var = anim_var([0.1, 0.2, .., 1], speed=0)
+sage: animated_plot3d(draw_torus, R_var, r_var) # long time
+Graphics3d Object
+</pre>
+
+<h3><a href="d12.html">Passing non-animation variable arguments</a></h3>
+<pre>
+sage: def d12(x, y, z, theta):
+....:     return dodecahedron().translate((x, y, z)).rotateZ(theta)
+sage: plot = animated_plot3d(d12, 1, 2, z=3, theta=anim_var(0, pi/16, .., 2*pi))
+sage: show(plot, auto_play=False)
+</pre>
+
 </body>
 </html>

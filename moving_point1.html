@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html><head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+
+    body { margin: 0px; overflow: hidden; }
+
+    #menu-container { position: absolute; bottom: 30px; right: 40px; }
+
+    #menu-content { position: absolute; bottom: 0px; right: 0px;
+                    display: none; background-color: #F5F5F5; border-bottom: 1px solid black;
+                    border-right: 1px solid black; border-left: 1px solid black; }
+
+    #menu-content div { border-top: 1px solid black; padding: 10px; white-space: nowrap; }
+
+</style>
+<style>/* animation.css */
+
+.animation-ui { position: absolute; top: 0; left: 0; opacity: 0.8;
+                box-shadow: 2px 2px 4px darkgray; z-index: 1;
+                border: 1px solid rgb(49, 49, 255); overflow: hidden; }
+
+.animation-ui:hover { opacity: 1; }
+
+.animation-ui .heading { margin: 0; height: 2em; line-height: 2em;
+                         font-size: 1em; padding: 0 5px; cursor: default;
+                         outline: none; user-select: none;
+                         background: rgb(49, 49, 255); color: white; }
+
+.animation-ui.collapsed .heading { width: 2em; padding: 0; text-align: center; }
+
+.animation-ui .heading::before { content: "▼ Animation Variables"; }
+
+.animation-ui.collapsed .heading::before { content: "▶"; }
+
+.animation-ui .container { resize: both; overflow: auto; background: #f5f5f5;
+                           min-width: 12em; max-width: calc(100vw - 3px);
+                           min-height: 1em; max-height: calc(100vh - 2em - 3px); }
+
+.animation-ui.collapsed .container { display: none; }
+
+.var-table { width: 100%; padding: 5px; }
+
+.var-table td { width: 1px; white-space: nowrap; }
+
+.name-col { text-align: right; font-style: italic; }
+
+.playing .name-col var { text-decoration: underline; }
+
+.value-col input { width: 5em; }
+
+.slider-col { width: auto !important; }
+
+.slider-col input { width: 100%; min-width: 120px; }
+
+.buttons-col { padding-left: 5px; vertical-align: middle; }
+
+.buttons-col button { color: rgb(49, 49, 255); user-select: none;
+                      width: 2em; height: 2em; vertical-align: middle; }
+
+.playing button.play,
+.paused button.pause,
+.unplayable button.play,
+.unplayable button.extras { display: none; }
+
+.extras-menu { display: none; position: absolute; z-index: 2;
+               background: #f5f5f5; outline: 1px solid lightgray;
+               box-shadow: 2px 2px 4px darkgray; opacity: 0.8; }
+
+.extras-menu.shown { display: block; }
+
+.extras-menu:hover { opacity: 1; }
+
+.extras-menu button { display: block; width: 100%; padding: 5px 5px 5px 0;
+                      text-align: left; border: none; outline: none;
+                      background: none; color: black; user-select: none; }
+
+.extras-menu button:hover { color: rgb(49, 49, 255); }
+
+.extras-menu button:active { background: rgb(49, 49, 255); color: white; }
+
+.extras-menu span { display: inline-block; width: 2em; text-align: center; }
+
+.extras-menu hr { margin: 0; border: none; border-top: 1px solid lightgray; }
+
+.once button.once,
+.repeat button.repeat,
+.pingpong button.pingpong,
+.forward button.forward,
+.backward button.backward { background: rgb(49, 49, 255); color: white !important; }
+</style>
+</head>
+
+<body>
+
+<script src="/nbextensions/threejs/build/three.min.js"></script>
+<script src="/nbextensions/threejs/examples/js/controls/OrbitControls.js"></script>
+<script>
+  if ( !window.THREE ) document.write(' \
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/build/three.min.js"><\/script> \
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/examples/js/controls/OrbitControls.js"><\/script> \
+            ');
+</script>
+        <script>// animation.js
+
+function initAnimation( scene, renderCallback ) {
+    return new AnimationSystem( scene, renderCallback );
+}
+
+
+class AnimationSystem {
+
+    constructor( scene, renderCallback ) {
+
+        // We're assuming that Sage has ensured that...
+        // - the IDs of animation variables are unique,
+        // - the names, preferably, are also unique (to avoid confusing the user),
+        // - each variable contains at least two key values,
+        // - the key values are sorted ascending, and
+        // - the key values contain no duplicates.
+        //
+        this.options = {"variables": [{"key_values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "display_name": "t", "initial": null, "speed": 5.0, "loop": "repeat", "auto_play": true, "id": 139958127955400, "name": "t", "keyValues": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0], "autoPlay": true}], "allowAutoPlay": true};
+
+        this.state = new AnimationState( this.options.variables, renderCallback );
+        this.scene = new AnimatedScene( scene, this.state );
+
+        if ( !document.readyState || document.readyState === 'loading') {
+            document.addEventListener( 'DOMContentLoaded', () => this.start() );
+        } else {
+            this.start();
+        }
+
+    }
+
+    start() {
+
+        // When using the "Save as HTML" menu option, the current state of the
+        // animation UI is included in the output. In case we're running in such
+        // an output file, make sure the old UI is gone before creating a new one
+        // so we don't end up with two of them!
+        AnimationUI.removeExisting();
+        this.ui = new AnimationUI( this.state );
+
+        if ( this.options.allowAutoPlay ) this.state.autoPlay();
+
+        let singleVar = this.state.variables.length == 1 && this.state.variables[0];
+        if ( singleVar && singleVar.playing ) {
+            // For convenience in the very common use case of a single variable
+            // set to auto-play, get the UI out of the way so the user can focus
+            // on the plot.
+            this.ui.collapse();
+        }
+
+    }
+
+    update() {
+        let keepUpdating = this.state.update();
+        this.scene.update();
+        return keepUpdating;
+    }
+
+    getVisibleObjects() {
+        return this.scene.getVisibleObjects();
+    }
+
+}
+
+
+class AnimationState {
+
+    constructor( variableConfigs, renderCallback ) {
+
+        this.variables = [];
+        this.variablesById = {};
+        this.clock = new THREE.Clock( false ); // Don't auto-start.
+
+        let render = () => {
+            // Only trigger a manual re-render if we're not already animating
+            // (and thus automatically rendering).
+            if ( renderCallback && !this.clock.running ) renderCallback();
+        };
+
+        for ( let i=0 ; i < variableConfigs.length ; i++ ) {
+            let avar = new AnimationVariable( i, variableConfigs[i], render );
+            this.variables.push( avar );
+            this.variablesById[avar.id] = avar;
+        }
+
+    }
+
+    update() {
+
+        if ( !this.clock.running ) {
+            this.clock.start();
+            return true; // deltaTime = 0; nothing would change
+        }
+
+        let keepUpdating = false;
+        let deltaTime = this.clock.getDelta(); // seconds
+
+        for ( let j=0 ; j < this.variables.length ; j++ )
+            if ( this.variables[j].update( deltaTime ) )
+                keepUpdating = true;
+
+        if ( !keepUpdating ) this.clock.stop();
+        return keepUpdating;
+
+    }
+
+    autoPlay() {
+
+        let anyPlaying = false;
+        let firstToPlay = null;
+
+        for ( let i=0 ; i < this.variables.length ; i++ ) {
+            let avar = this.variables[i];
+            // Make sure it's playable AND the user hasn't explicitly forbidden
+            // auto-playing it.
+            if ( avar.playable && avar.autoPlay !== false ) {
+                if ( avar.autoPlay ) {
+                    avar.play();
+                    anyPlaying = true;
+                } else if ( !firstToPlay ) {
+                    firstToPlay = avar;
+                }
+            }
+        }
+
+        // If no variables were set to auto-play, play the first one we can.
+        if ( !anyPlaying && firstToPlay ) firstToPlay.play();
+
+    }
+
+}
+
+
+class AnimationVariable {
+
+    constructor( index, config, renderCallback ) {
+
+        this.index = index;
+        this.id = config.id;
+        this.name = config.name;
+        this.keyValues = config.keyValues;
+        this.initial = config.initial;
+        this.speed = config.speed;
+        this.loop = config.loop;
+        this.autoPlay = config.autoPlay;
+        this.renderCallback = renderCallback;
+
+        this.min = this.keyValues[0];
+        this.max = this.keyValues[this.keyValues.length - 1];
+        this.range = this.max - this.min;
+
+        if ( typeof( this.initial ) !== 'number' )
+            this.initial = this.min;
+        this.value = this.clamp( this.initial );
+        this.updateKeyIndex();
+
+        if ( typeof( this.speed ) !== 'number' )
+            this.speed = this.max - this.min;
+
+        if ( this.loop !== 'once' && this.loop !== 'pingpong' )
+            this.loop = 'repeat';
+
+        this.playable = this.speed != 0;
+        this.playing = false;
+
+    }
+
+    play() {
+
+        if ( !this.playable ) return;
+
+        if ( this.loop === 'once' ) {
+            // Wrap back around. Otherwise, the animation has no where to go.
+            if ( this.speed < 0 && this.value == this.min )
+                this.seek( this.max );
+            else if ( this.speed > 0 && this.value == this.max )
+                this.seek( this.min );
+        }
+
+        this.playing = true;
+        this.updateUI();
+        this.renderScene();
+
+    }
+
+    pause() {
+        this.playing = false;
+        this.updateUI();
+    }
+
+    seek( value ) {
+        this.value = this.clamp( value );
+        this.updateKeyIndex();
+        this.updateUI();
+        this.renderScene();
+    }
+
+    gotoPreviousKeyValue() {
+        if ( this.keyIndex <= 0 ) {
+            this.seek( this.min );
+        } else {
+            this.seek( this.keyValues[this.keyIndex - 1] );
+        }
+    }
+
+    gotoNextKeyValue() {
+        if ( this.keyIndex >= this.keyValues.length - 1 ) {
+            this.seek( this.max );
+        } else {
+            this.seek( this.keyValues[this.keyIndex + 1] );
+        }
+    }
+
+    setLoop( loop ) {
+        if ( loop === 'once' || loop === 'repeat' || loop === 'pingpong' )
+            this.loop = loop;
+        this.updateUI();
+    }
+
+    setDirection( direction ) {
+        if ( Math.sign( this.speed ) != Math.sign( direction ) )
+            this.speed = -this.speed;
+        this.updateUI();
+    }
+
+    faster() { this.speed *= 1.5; }
+    slower() { this.speed /= 1.5; }
+
+    update( deltaTime ) {
+
+        if ( !this.playing ) return false;
+
+        let newValue = this.value + this.speed * deltaTime;
+
+        if ( newValue < this.min || newValue > this.max ) {
+            switch ( this.loop ) {
+                case 'repeat':
+                    newValue = this.wrap( newValue );
+                    break;
+                case 'pingpong':
+                    this.speed = -this.speed;
+                    break;
+                case 'once':
+                    this.playing = false;
+                    break;
+            }
+        }
+
+        this.seek( newValue );
+        this.updateUI();
+
+        return this.playing;
+    }
+
+    updateUI() {
+        if ( this.ui ) this.ui.update();
+    }
+
+    renderScene() {
+        if ( this.renderCallback ) this.renderCallback();
+    }
+
+    clamp( x ) {
+        return Math.max( this.min, Math.min( this.max, x ) );
+    }
+
+    wrap( x ) {
+        return x - this.range * Math.floor( ( x - this.min ) / this.range );
+    }
+
+    calculateKeyIndex( value, startIndex ) {
+
+        if ( value == this.min ) return 0;
+        if ( value == this.max ) return this.keyValues.length - 1;
+
+        startIndex = startIndex || 0;
+
+        for ( let i=startIndex ; i < this.keyValues.length ; i++ )
+            if ( value >= this.keyValues[i] && value < this.keyValues[i+1] )
+                return i;
+
+        for ( let i=0 ; i < startIndex ; i++ )
+            if ( value >= this.keyValues[i] && value < this.keyValues[i+1] )
+                return i;
+
+        return startIndex; // Should never get to this point!
+
+    }
+
+    updateKeyIndex() {
+        this.keyIndex = this.calculateKeyIndex( this.value, this.keyIndex );
+    }
+
+}
+
+
+class AnimatedScene {
+
+    constructor( scene, animationState ) {
+
+        this.animationState = animationState;
+        this.keyframeLookup = [];
+
+        // Map each keyframe to a list of scene objects visible in that keyframe.
+        // Also, ensure each object with keyframe info starts off invisible.
+        for ( let i=0 ; i < scene.children.length ; i++ ) {
+            let obj = scene.children[i];
+            let keyframes = obj.userData && obj.userData.keyframes;
+
+            if ( !keyframes ) continue;
+
+            for ( let j=0 ; j < keyframes.length ; j++ ) {
+                let keyframe = keyframes[j];
+                if ( keyframe in this.keyframeLookup ) {
+                    this.keyframeLookup[keyframe].push( obj );
+                } else {
+                    this.keyframeLookup[keyframe] = [obj];
+                }
+            }
+
+            obj.visible = false;
+        }
+
+    }
+
+    getVisibleObjects() {
+        return this.keyframeLookup[this.keyframe] || [];
+    }
+
+    update() {
+
+        let oldKeyframe = this.keyframe;
+        this.updateKeyframe();
+        let newKeyframe = this.keyframe;
+
+        if ( newKeyframe !== oldKeyframe ) {
+            bulkSetVisible( this.keyframeLookup[oldKeyframe], false );
+            bulkSetVisible( this.keyframeLookup[newKeyframe], true  );
+        }
+
+        function bulkSetVisible( objects, visible ) {
+            if ( objects ) {
+                for ( let i=0 ; i < objects.length ; i++ ) {
+                    objects[i].visible = visible;
+                }
+            }
+        }
+
+    }
+
+    updateKeyframe() {
+        this.keyframe = 0;
+        for ( let i=0, coef=1 ; i < this.animationState.variables.length ; i++ ) {
+            let avar = this.animationState.variables[i];
+            this.keyframe += coef * avar.keyIndex;
+            coef *= avar.keyValues.length;
+        }
+    }
+
+}
+
+
+class AnimationUI {
+
+    constructor( animationState ) {
+
+        this.uiDiv = document.createElement( 'div' );
+        this.uiDiv.id = 'animation-ui';
+        this.uiDiv.classList.add( 'animation-ui' );
+        document.body.appendChild( this.uiDiv );
+
+        let h1 = document.createElement( 'h1' );
+        h1.classList.add( 'heading' );
+        h1.setAttribute( 'title', "Show/hide the animation variables panel." );
+        h1.onclick = () => this.toggle();
+        this.uiDiv.appendChild( h1 );
+
+        let containerDiv = document.createElement( 'div' );
+        containerDiv.classList.add( 'container' );
+        this.uiDiv.appendChild( containerDiv );
+
+        let table = document.createElement( 'table' );
+        table.classList.add( 'var-table' );
+        containerDiv.appendChild( table );
+
+        this.rows = [];
+        for ( let r=0 ; r < animationState.variables.length ; r++ ) {
+            let row = new AnimVariableRow( table, animationState.variables[r] );
+            this.rows.push( row );
+        }
+
+        animationState.ui = this;
+
+        this.update();
+
+    }
+
+    static removeExisting() {
+        let uiDiv = document.getElementById( 'animation-ui' );
+        if ( uiDiv ) uiDiv.parentNode.removeChild( uiDiv );
+    }
+
+    expand() {
+        this.uiDiv.classList.remove( 'collapsed' );
+    }
+
+    collapse() {
+        AnimExtrasMenu.hideAll();
+        this.uiDiv.classList.add( 'collapsed' );
+    }
+
+    toggle() {
+        this.uiDiv.classList.contains( 'collapsed' ) ? this.expand() : this.collapse();
+    }
+
+    update() {
+        for ( let r=0 ; r < this.rows.length ; r++ ) this.rows[r].update();
+    }
+
+}
+
+
+class AnimVariableRow {
+
+    constructor( table, animationVar ) {
+
+        let tr = document.createElement( 'tr' );
+        table.appendChild( tr );
+
+        this.nameCol = new AnimNameColumn( tr, animationVar );
+        this.textboxCol = new AnimTextboxColumn( tr, animationVar );
+        this.sliderCol = new AnimSliderColumn( tr, animationVar );
+        this.buttonsCol = new AnimButtonsColumn( tr, animationVar );
+
+        animationVar.ui = this;
+
+    }
+
+    update() {
+        this.textboxCol.update();
+        this.sliderCol.update();
+        this.buttonsCol.update();
+    }
+
+}
+
+
+class AnimNameColumn {
+
+    constructor( tr, animationVar ) {
+
+        let td = document.createElement( 'td' );
+        td.classList.add( 'name-col' );
+        tr.appendChild( td );
+
+        let label = document.createElement( 'label' );
+        label.setAttribute( 'for', 'var-value-' + animationVar.index );
+        td.appendChild( label );
+
+        let _var = document.createElement( 'var' );
+        _var.appendChild( document.createTextNode( animationVar.name ) );
+        label.appendChild( _var );
+
+        label.appendChild( document.createTextNode( " = " ) );
+
+    }
+
+}
+
+
+class AnimTextboxColumn {
+
+    constructor( tr, animationVar ) {
+
+        this.animationVar = animationVar;
+
+        let td = document.createElement( 'td' );
+        td.classList.add( 'value-col' );
+        tr.appendChild( td );
+
+        this.input = document.createElement( 'input' );
+        this.input.id = 'var-value-' + animationVar.index;
+        this.input.setAttribute( 'type', 'text' );
+        this.input.value = animationVar.value;
+        this.input.onblur = () => this.seek();
+        this.input.onkeyup = event => {
+            if ( event.key === 'Enter' ) {
+                event.preventDefault();
+                this.seek();
+            }
+        };
+        td.appendChild( this.input );
+
+    }
+
+    seek() {
+        let newValue = parseFloat( this.input.value );
+        if ( isNaN( newValue ) ) this.input.value = this.animationVar.value;
+        else this.animationVar.seek( newValue );
+    }
+
+    update() {
+        this.input.value = this.animationVar.value;
+    }
+
+}
+
+
+class AnimSliderColumn {
+
+    constructor( tr, animationVar ) {
+
+        this.animationVar = animationVar;
+
+        // Browsers seem to be a bit finicky with slider values past a certain number
+        // of decimal digits, even when setting step="any", resulting in bugs like not
+        // being able to slide all the way to the endpoint values. To side-step these,
+        // we just use all the representable non-negative integers we can for the
+        // slider's value, which browsers seem to handle much more consistently.
+        this.inputMax = Number.MAX_SAFE_INTEGER || 9007199254740991; // 2^53 - 1
+
+        let td = document.createElement( 'td' );
+        td.classList.add( 'slider-col' );
+        tr.appendChild( td );
+
+        this.input = document.createElement( 'input' );
+        this.input.setAttribute( 'type', 'range' );
+        this.input.setAttribute( 'min', 0 );
+        this.input.setAttribute( 'max', this.inputMax );
+        this.input.setAttribute( 'step', '1' );
+        this.input.setAttribute( 'list', 'key-values-' + animationVar.index );
+        this.input.value = this.varToSlider( animationVar.value );
+        this.input.oninput = () => this.seek();
+        this.input.onchange = this.input.oninput;
+        this.input.onkeydown = event => {
+            if ( this.seekUsingArrowKey( event.key ) ) event.preventDefault();
+        };
+        td.appendChild( this.input );
+
+        let datalist = document.createElement( 'datalist' );
+        datalist.id = 'key-values-' + animationVar.index;
+        td.appendChild( datalist );
+
+        for ( let i=0 ; i < animationVar.keyValues.length ; i++ ) {
+            let option = document.createElement( 'option' );
+            option.value = this.varToSlider( animationVar.keyValues[i] );
+            datalist.appendChild( option );
+        }
+
+    }
+
+    seek() {
+        this.animationVar.seek( this.sliderToVar( this.input.value ) );
+    }
+
+    seekUsingArrowKey( key ) {
+        switch ( key ) {
+            case 'Down':
+            case 'ArrowDown':
+            case 'Left':
+            case 'ArrowLeft':
+                this.animationVar.gotoPreviousKeyValue();
+                return true;
+            case 'Up':
+            case 'ArrowUp':
+            case 'Right':
+            case 'ArrowRight':
+                this.animationVar.gotoNextKeyValue();
+                return true;
+        }
+    }
+
+    update() {
+        this.input.value = this.varToSlider( this.animationVar.value );
+    }
+
+    sliderToVar( value ) {
+        let progress = value / this.inputMax; // in [0,1]
+        return this.animationVar.min + this.animationVar.range * progress; // now in [min,max]
+    }
+
+    varToSlider( value ) {
+        let progress = ( value - this.animationVar.min ) / this.animationVar.range; // in [0,1]
+        progress = Math.max( 0, Math.min( 1, progress ) ); // just to be sure it's ^
+        return Math.round(progress * this.inputMax);
+    }
+
+}
+
+
+class AnimButtonsColumn {
+
+    constructor( tr, animationVar ) {
+
+        this.animationVar = animationVar;
+
+        this.td = document.createElement( 'td' );
+        this.td.classList.add( 'buttons-col' );
+        tr.appendChild( this.td );
+
+        this.addButton( 'play', "▶", "Play", () => animationVar.play() );
+        this.addButton( 'pause', "❚❚", "Pause", () => animationVar.pause() );
+
+        let extrasButton = this.addButton( 'extras', "≡", "Additional options" );
+        this.extrasMenu = new AnimExtrasMenu( animationVar, extrasButton );
+        extrasButton.onclick = () => this.extrasMenu.toggle();
+
+    }
+
+    update() {
+        this.td.classList.remove( 'playable', 'unplayable', 'playing', 'paused' );
+        this.td.classList.add( this.animationVar.playable ? 'playable' : 'unplayable' )
+        this.td.classList.add( this.animationVar.playing  ? 'playing' : 'paused' );
+        this.extrasMenu.update();
+    }
+
+    addButton( _class, text, tooltip, onclick ) {
+        let button = document.createElement( 'button' );
+        button.classList.add( _class );
+        button.setAttribute( 'type', 'button' );
+        button.setAttribute( 'title', tooltip );
+        button.onclick = onclick;
+        button.appendChild( document.createTextNode( text ) );
+        this.td.appendChild(button);
+        return button;
+    }
+
+}
+
+
+class AnimExtrasMenu {
+
+    constructor( animationVar, extrasButton ) {
+
+        this.animationVar = animationVar;
+        this.extrasButton = extrasButton;
+
+        this.div = document.createElement( 'div' );
+        this.div.classList.add( 'extras-menu' );
+        document.body.appendChild( this.div );
+
+        this.addLoopButton( 'once', "×1", "Play once" );
+        this.addLoopButton( 'repeat', "∞", "Repeat" );
+        this.addLoopButton( 'pingpong', "↹", "Ping-pong" );
+        this.addSeparator();
+        this.addDirectionButton( 'forward', "→", "Play forwards",  +1 );
+        this.addDirectionButton( 'backward', "←", "Play backwards", -1 );
+        this.addSeparator();
+        this.addSpeedButton( 'faster', "+", "Increase speed", +1 );
+        this.addSpeedButton( 'slower', "-", "Decrease speed", -1 );
+
+    }
+
+    static hideAll() {
+        let menuDivs = document.getElementsByClassName( 'extras-menu' );
+        for ( let i=0 ; i < menuDivs.length ; i++)
+            menuDivs[i].classList.remove( 'shown' );
+    }
+
+    show() {
+
+        AnimExtrasMenu.hideAll();
+
+        // The menu style's `right` is distance from right edge of window
+        // to menu's right edge. The rect's `right` is distance from the left
+        // edge of the window to the right edge of the extras button.
+        let rect = this.extrasButton.getBoundingClientRect();
+        this.div.style.right = ( window.innerWidth - rect.right ) + 'px';
+        this.div.style.top = rect.bottom + 'px';
+
+        this.div.classList.add( 'shown' );
+
+    }
+
+    hide() {
+        this.div.classList.remove( 'shown' );
+    }
+
+    toggle() {
+        this.div.classList.contains( 'shown' ) ? this.hide() : this.show();
+    }
+
+    update() {
+        this.div.classList.remove( 'once', 'repeat', 'pingpong', 'forward', 'backward' );
+        this.div.classList.add( this.animationVar.loop );
+        this.div.classList.add( this.animationVar.speed > 0 ? 'forward' : 'backward' );
+    }
+
+    addButton( _class, shortText, longText, onclick ) {
+
+        let button = document.createElement( 'button' );
+        button.classList.add( _class );
+        button.setAttribute( 'type', 'button' );
+        button.onclick = onclick;
+        this.div.appendChild( button );
+
+        let span = document.createElement( 'span' );
+        span.appendChild( document.createTextNode( shortText ) );
+        button.appendChild( span );
+
+        button.appendChild( document.createTextNode( longText ) );
+
+    }
+
+    addLoopButton( loopMode, shortText, longText ) {
+        let onclick = () => this.animationVar.setLoop( loopMode );
+        this.addButton( loopMode, shortText, longText, onclick );
+    }
+
+    addDirectionButton( _class, shortText, longText, direction ) {
+        let onclick = () => this.animationVar.setDirection( direction );
+        this.addButton( _class, shortText, longText, onclick );
+    }
+
+    addSpeedButton( _class, shortText, longText, upDown ) {
+        let onclick = (
+            upDown > 0
+                ? () => this.animationVar.faster()
+                : () => this.animationVar.slower()
+        );
+        this.addButton( _class, shortText, longText, onclick );
+    }
+
+    addSeparator() {
+        this.div.appendChild( document.createElement( 'hr' ) );
+    }
+
+}
+</script>
+<script>
+
+    var scene = new THREE.Scene();
+
+    var renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( 0xffffff, 1 );
+    document.body.appendChild( renderer.domElement );
+
+    var options = {"animate": true, "aspect_ratio": [1.0, 1.0, 1.0], "axes": false, "axes_labels": ["x", "y", "z"], "decimals": 2, "frame": true, "projection": "perspective"};
+    var animate = options.animate;
+
+    var b = [{"x":-1.0, "y":-1.0, "z":-0.5}, {"x":1.0, "y":1.0, "z":0.5}]; // bounds
+
+    if ( b[0].x === b[1].x ) {
+        b[0].x -= 1;
+        b[1].x += 1;
+    }
+    if ( b[0].y === b[1].y ) {
+        b[0].y -= 1;
+        b[1].y += 1;
+    }
+    if ( b[0].z === b[1].z ) {
+        b[0].z -= 1;
+        b[1].z += 1;
+    }
+
+    var rRange = Math.sqrt( Math.pow( b[1].x - b[0].x, 2 )
+                            + Math.pow( b[1].y - b[0].y, 2 ) );
+    var xRange = b[1].x - b[0].x;
+    var yRange = b[1].y - b[0].y;
+    var zRange = b[1].z - b[0].z;
+
+    var ar = options.aspect_ratio;
+    var a = [ ar[0], ar[1], ar[2] ]; // aspect multipliers
+    var autoAspect = 2.5;
+    if ( zRange > autoAspect * rRange && a[2] === 1 ) a[2] = autoAspect * rRange / zRange;
+
+    // Distance from (xMid,yMid,zMid) to any corner of the bounding box, after applying aspect_ratio.
+    var midToCorner = Math.sqrt( a[0]*a[0]*xRange*xRange + a[1]*a[1]*yRange*yRange + a[2]*a[2]*zRange*zRange ) / 2;
+
+    var xMid = ( b[0].x + b[1].x ) / 2;
+    var yMid = ( b[0].y + b[1].y ) / 2;
+    var zMid = ( b[0].z + b[1].z ) / 2;
+
+    var box = new THREE.Geometry();
+    box.vertices.push( new THREE.Vector3( a[0]*b[0].x, a[1]*b[0].y, a[2]*b[0].z ) );
+    box.vertices.push( new THREE.Vector3( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) );
+    var boxMesh = new THREE.Line( box );
+    if ( options.frame ) scene.add( new THREE.BoxHelper( boxMesh, 'black' ) );
+
+    if ( options.axes_labels ) {
+
+        var d = options.decimals; // decimals
+        var offsetRatio = 0.1;
+        var al = options.axes_labels;
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var xm = xMid.toFixed(d);
+        if ( /^-0.?0*$/.test(xm) ) xm = xm.substr(1);
+        addLabel( al[0] + '=' + xm, a[0]*xMid, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[0].x ).toFixed(d), a[0]*b[0].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[1].x ).toFixed(d), a[0]*b[1].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[0]*( b[1].x - b[0].x );
+        var ym = yMid.toFixed(d);
+        if ( /^-0.?0*$/.test(ym) ) ym = ym.substr(1);
+        addLabel( al[1] + '=' + ym, a[0]*b[1].x+offset, a[1]*yMid, a[2]*b[0].z );
+        addLabel( ( b[0].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[0].y, a[2]*b[0].z );
+        addLabel( ( b[1].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[1].y, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var zm = zMid.toFixed(d);
+        if ( /^-0.?0*$/.test(zm) ) zm = zm.substr(1);
+        addLabel( al[2] + '=' + zm, a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*zMid );
+        addLabel( ( b[0].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[0].z );
+        addLabel( ( b[1].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[1].z );
+
+    }
+
+    function addLabel( text, x, y, z ) {
+
+        var fontsize = 14;
+
+        var canvas = document.createElement( 'canvas' );
+        var pixelRatio = Math.round( window.devicePixelRatio );
+        canvas.width = 128 * pixelRatio;
+        canvas.height = 32 * pixelRatio; // powers of two
+        canvas.style.width = '128px';
+        canvas.style.height = '32px';
+
+        var context = canvas.getContext( '2d' );
+        context.scale( pixelRatio, pixelRatio );
+        context.fillStyle = 'black';
+        context.font = fontsize + 'px monospace';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText( text, canvas.width/2/pixelRatio, canvas.height/2/pixelRatio );
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: texture } ) );
+        sprite.position.set( x, y, z );
+
+        // Set the initial scale based on plot size to accomodate orthographic projection.
+        // For other projections, the scale will get reset each frame based on camera distance.
+        var scale = midToCorner/2;
+        sprite.scale.set( scale, scale*.25 ); // ratio of canvas width to height
+
+        scene.add( sprite );
+
+        return sprite;
+
+    }
+
+    if ( options.axes ) scene.add( new THREE.AxesHelper( Math.min( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) ) );
+
+    var camera = createCamera();
+    camera.up.set( 0, 0, 1 );
+    camera.position.set( a[0]*(xMid+xRange), a[1]*(yMid+yRange), a[2]*(zMid+zRange) );
+
+    function createCamera() {
+
+        var aspect = window.innerWidth / window.innerHeight;
+
+        if ( options.projection === 'orthographic' ) {
+            var camera = new THREE.OrthographicCamera( -1, 1, 1, -1, -1000, 1000 );
+            updateCameraAspect( camera, aspect );
+            return camera;
+        }
+
+        return new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000 );
+
+    }
+
+    function updateCameraAspect( camera, aspect ) {
+
+        if ( camera.isPerspectiveCamera ) {
+            camera.aspect = aspect;
+        } else if ( camera.isOrthographicCamera ) {
+            // Fit the camera frustum to the bounding box's diagonal so that the entire plot fits
+            // within at the default zoom level and camera position.
+            if ( aspect > 1 ) { // Wide window
+                camera.top = midToCorner;
+                camera.right = midToCorner * aspect;
+            } else { // Tall or square window
+                camera.top = midToCorner / aspect;
+                camera.right = midToCorner;
+            }
+            camera.bottom = -camera.top;
+            camera.left = -camera.right;
+        }
+
+        camera.updateProjectionMatrix();
+
+    }
+
+    var lights = [{"x":-5, "y":3, "z":0, "color":"#7f7f7f", "parent":"camera"}];
+    for ( var i=0 ; i < lights.length ; i++ ) {
+        var light = new THREE.DirectionalLight( lights[i].color, 1 );
+        light.position.set( a[0]*lights[i].x, a[1]*lights[i].y, a[2]*lights[i].z );
+        if ( lights[i].parent === 'camera' ) {
+            light.target.position.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+            scene.add( light.target );
+            camera.add( light );
+        } else scene.add( light );
+    }
+    scene.add( camera );
+
+    var ambient = {"color":"#7f7f7f"};
+    scene.add( new THREE.AmbientLight( ambient.color, 1 ) );
+
+    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.target.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+    controls.addEventListener( 'change', function() { if ( !animate ) render(); } );
+
+    window.addEventListener( 'resize', function() {
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        updateCameraAspect( camera, window.innerWidth / window.innerHeight );
+        if ( !animate ) render();
+
+    } );
+
+    var texts = [];
+    for ( var i=0 ; i < texts.length ; i++ ) addText( texts[i] );
+
+    function addText( json ) {
+        var sprite = addLabel( json.text, a[0]*json.x, a[1]*json.y, a[2]*json.z );
+        if ( json.keyframes )
+            sprite.userData = { "keyframes": json.keyframes };
+    }
+
+    var points = [{"point":[0.0, 1.0, 0.0], "size":5, "color":"blue", "opacity":1.0, "keyframes":[0]},{"point":[0.19509032201612825, 0.9807852804032304, 0.19134171618254486], "size":5, "color":"blue", "opacity":1.0, "keyframes":[1]},{"point":[0.3826834323650897, 0.9238795325112867, 0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[2]},{"point":[0.5555702330196022, 0.8314696123025452, 0.4619397662556433], "size":5, "color":"blue", "opacity":1.0, "keyframes":[3]},{"point":[0.7071067811865476, 0.7071067811865476, 0.5], "size":5, "color":"blue", "opacity":1.0, "keyframes":[4]},{"point":[0.8314696123025452, 0.5555702330196023, 0.4619397662556434], "size":5, "color":"blue", "opacity":1.0, "keyframes":[5]},{"point":[0.9238795325112867, 0.3826834323650897, 0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[6]},{"point":[0.9807852804032304, 0.19509032201612833, 0.19134171618254495], "size":5, "color":"blue", "opacity":1.0, "keyframes":[7]},{"point":[1.0, 0.0, 0.0], "size":5, "color":"blue", "opacity":1.0, "keyframes":[8]},{"point":[0.9807852804032304, -0.19509032201612833, -0.19134171618254495], "size":5, "color":"blue", "opacity":1.0, "keyframes":[9]},{"point":[0.9238795325112867, -0.3826834323650897, -0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[10]},{"point":[0.8314696123025452, -0.5555702330196023, -0.4619397662556434], "size":5, "color":"blue", "opacity":1.0, "keyframes":[11]},{"point":[0.7071067811865476, -0.7071067811865476, -0.5], "size":5, "color":"blue", "opacity":1.0, "keyframes":[12]},{"point":[0.5555702330196022, -0.8314696123025452, -0.4619397662556433], "size":5, "color":"blue", "opacity":1.0, "keyframes":[13]},{"point":[0.3826834323650897, -0.9238795325112867, -0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[14]},{"point":[0.19509032201612825, -0.9807852804032304, -0.19134171618254486], "size":5, "color":"blue", "opacity":1.0, "keyframes":[15]},{"point":[0.0, -1.0, 0.0], "size":5, "color":"blue", "opacity":1.0, "keyframes":[16]},{"point":[-0.19509032201612825, -0.9807852804032304, 0.19134171618254486], "size":5, "color":"blue", "opacity":1.0, "keyframes":[17]},{"point":[-0.3826834323650897, -0.9238795325112867, 0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[18]},{"point":[-0.5555702330196022, -0.8314696123025452, 0.4619397662556433], "size":5, "color":"blue", "opacity":1.0, "keyframes":[19]},{"point":[-0.7071067811865476, -0.7071067811865476, 0.5], "size":5, "color":"blue", "opacity":1.0, "keyframes":[20]},{"point":[-0.8314696123025452, -0.5555702330196023, 0.4619397662556434], "size":5, "color":"blue", "opacity":1.0, "keyframes":[21]},{"point":[-0.9238795325112867, -0.3826834323650897, 0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[22]},{"point":[-0.9807852804032304, -0.19509032201612833, 0.19134171618254495], "size":5, "color":"blue", "opacity":1.0, "keyframes":[23]},{"point":[-1.0, 0.0, 0.0], "size":5, "color":"blue", "opacity":1.0, "keyframes":[24]},{"point":[-0.9807852804032304, 0.19509032201612833, -0.19134171618254495], "size":5, "color":"blue", "opacity":1.0, "keyframes":[25]},{"point":[-0.9238795325112867, 0.38268343236508984, -0.35355339059327384], "size":5, "color":"blue", "opacity":1.0, "keyframes":[26]},{"point":[-0.8314696123025452, 0.5555702330196023, -0.4619397662556434], "size":5, "color":"blue", "opacity":1.0, "keyframes":[27]},{"point":[-0.7071067811865476, 0.7071067811865476, -0.5], "size":5, "color":"blue", "opacity":1.0, "keyframes":[28]},{"point":[-0.5555702330196022, 0.8314696123025452, -0.4619397662556433], "size":5, "color":"blue", "opacity":1.0, "keyframes":[29]},{"point":[-0.3826834323650897, 0.9238795325112867, -0.35355339059327373], "size":5, "color":"blue", "opacity":1.0, "keyframes":[30]},{"point":[-0.19509032201612825, 0.9807852804032304, -0.19134171618254486], "size":5, "color":"blue", "opacity":1.0, "keyframes":[31]},{"point":[0.0, 1.0, 0.0], "size":5, "color":"blue", "opacity":1.0, "keyframes":[32]}];
+    for ( var i=0 ; i < points.length ; i++ ) addPoint( points[i] );
+
+    function addPoint( json ) {
+
+        var geometry = new THREE.Geometry();
+        var v = json.point;
+        geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = 128;
+        canvas.height = 128;
+
+        var context = canvas.getContext( '2d' );
+        context.arc( 64, 64, 64, 0, 2 * Math.PI );
+        context.fillStyle = json.color;
+        context.fill();
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var transparent = json.opacity < 1 ? true : false;
+        var size = camera.isOrthographicCamera ? json.size : json.size/100;
+        var material = new THREE.PointsMaterial( { size: size, map: texture,
+                                                   transparent: transparent, opacity: json.opacity,
+                                                   alphaTest: .1 } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Points( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        scene.add( mesh );
+
+        if ( json.keyframes )
+            mesh.userData = { "keyframes": json.keyframes };
+
+    }
+
+    var lines = [];
+    for ( var i=0 ; i < lines.length ; i++ ) addLine( lines[i] );
+
+    function addLine( json ) {
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.points.length ; i++ ) {
+            var v = json.points[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+        }
+
+        var transparent = json.opacity < 1 ? true : false;
+        var material = new THREE.LineBasicMaterial( { color: json.color, linewidth: json.linewidth,
+                                                      transparent: transparent, opacity: json.opacity } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Line( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        scene.add( mesh );
+
+        if ( json.keyframes )
+            mesh.userData = { "keyframes": json.keyframes };
+
+    }
+
+    var surfaces = [];
+    for ( var i=0 ; i < surfaces.length ; i++ ) addSurface( surfaces[i] );
+
+    function addSurface( json ) {
+
+        var useFaceColors = 'faceColors' in json ? true : false;
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.vertices.length ; i++ ) {
+            var v = json.vertices[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v.x, a[1]*v.y, a[2]*v.z ) );
+        }
+        for ( var i=0 ; i < json.faces.length ; i++ ) {
+            var f = json.faces[i];
+            for ( var j=0 ; j < f.length - 2 ; j++ ) {
+                var face = new THREE.Face3( f[0], f[j+1], f[j+2] );
+                if ( useFaceColors ) face.color.set( json.faceColors[i] );
+                geometry.faces.push( face );
+            }
+        }
+        geometry.computeVertexNormals();
+
+        var side = json.singleSide ? THREE.FrontSide : THREE.DoubleSide;
+        var transparent = json.opacity < 1 ? true : false;
+
+        var material = new THREE.MeshPhongMaterial( { side: side,
+                                     color: useFaceColors ? 'white' : json.color,
+                                     vertexColors: useFaceColors ? THREE.FaceColors : THREE.NoColors,
+                                     transparent: transparent, opacity: json.opacity,
+                                     shininess: 20, flatShading: json.useFlatShading } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        if ( transparent && json.renderOrder ) mesh.renderOrder = json.renderOrder;
+        scene.add( mesh );
+
+        if ( json.keyframes )
+            mesh.userData = { "keyframes": json.keyframes };
+
+        if ( json.showMeshGrid ) {
+
+            var geometry = new THREE.Geometry();
+
+            for ( var i=0 ; i < json.faces.length ; i++ ) {
+                var f = json.faces[i];
+                for ( var j=0 ; j < f.length ; j++ ) {
+                    var k = j === f.length-1 ? 0 : j+1;
+                    var v1 = json.vertices[f[j]];
+                    var v2 = json.vertices[f[k]];
+                    // vertices in opposite directions on neighboring faces
+                    var nudge = f[j] < f[k] ? .0005*zRange : -.0005*zRange;
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v1.x, a[1]*v1.y, a[2]*(v1.z+nudge) ) );
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v2.x, a[1]*v2.y, a[2]*(v2.z+nudge) ) );
+                }
+            }
+
+            var material = new THREE.LineBasicMaterial( { color: 'black', linewidth: 1 } );
+
+            var c = new THREE.Vector3();
+            geometry.computeBoundingBox();
+            geometry.boundingBox.getCenter( c );
+            geometry.translate( -c.x, -c.y, -c.z );
+
+            var mesh = new THREE.LineSegments( geometry, material );
+            mesh.position.set( c.x, c.y, c.z );
+            scene.add( mesh );
+
+            if ( json.keyframes )
+                mesh.userData = { "keyframes": json.keyframes };
+
+        }
+
+    }
+
+    var scratch = new THREE.Vector3();
+    var animation = animate && window.initAnimation && initAnimation( scene, render );
+
+    function render() {
+
+        if ( animation ) animate = animation.update();
+        if ( animate ) requestAnimationFrame( render );
+
+        // Resize text based on distance from camera.
+        // Not neccessary for orthographic due to the nature of the projection (preserves sizes).
+        if ( !camera.isOrthographicCamera ) {
+            var objects = animation ? animation.getVisibleObjects() : scene.children;
+            for ( var i=0 ; i < objects.length ; i++ ) {
+                if ( objects[i].type === 'Sprite' ) {
+                    var sprite = objects[i];
+                    var adjust = scratch.addVectors( sprite.position, scene.position )
+                                    .sub( camera.position ).length() / 5;
+                    sprite.scale.set( adjust, .25*adjust ); // ratio of canvas width to height
+                }
+            }
+        }
+
+        renderer.render( scene, camera );
+    }
+
+    render();
+    controls.update();
+    if ( !animate ) render();
+
+
+    // menu functions
+
+    function toggleMenu() {
+
+        var m = document.getElementById( 'menu-content' );
+        if ( m.style.display === 'block' ) m.style.display = 'none'
+        else m.style.display = 'block';
+
+    }
+
+
+    function saveAsPNG() {
+
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = renderer.domElement.toDataURL( 'image/png' );
+        a.download = 'screenshot';
+        a.click();
+
+    }
+
+    function saveAsHTML() {
+
+        toggleMenu(); // otherwise visible in output
+        event.stopPropagation();
+
+        var blob = new Blob( [ '<!DOCTYPE html>\n' + document.documentElement.outerHTML ] );
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = window.URL.createObjectURL( blob );
+        a.download = 'graphic.html';
+        a.click();
+
+    }
+
+    function getViewpoint() {
+
+        var info = '<pre>' + JSON.stringify( camera, null, '\t' ) + '</pre>';
+        window.open().document.write( info );
+
+    }
+
+</script><canvas width="2460" height="1000" tabindex="0" style="width: 984px; height: 400px;"></canvas>
+
+<div id="menu-container" onclick="toggleMenu()">ⓘ
+<div id="menu-content" style="display: none;">
+<div onclick="saveAsPNG()">Save as PNG</div>
+<div onclick="saveAsHTML()">Save as HTML</div>
+<div onclick="getViewpoint()">Camera Info</div>
+<div>Close Menu</div>
+</div></div>
+
+
+
+<div id="animation-ui" class="animation-ui collapsed"><h1 class="heading" title="Show/hide the animation variables panel."></h1><div class="container"><table class="var-table"><tr><td class="name-col"><label for="var-value-0"><var>t</var> = </label></td><td class="value-col"><input id="var-value-0" type="text"></td><td class="slider-col"><input type="range" min="0" max="9007199254740991" step="1" list="key-values-0"><datalist id="key-values-0"><option value="0"></option><option value="281474976710656"></option><option value="562949953421312"></option><option value="844424930131968"></option><option value="1125899906842624"></option><option value="1407374883553280"></option><option value="1688849860263936"></option><option value="1970324836974592"></option><option value="2251799813685248"></option><option value="2533274790395904"></option><option value="2814749767106560"></option><option value="3096224743817216"></option><option value="3377699720527872"></option><option value="3659174697238528"></option><option value="3940649673949184"></option><option value="4222124650659840"></option><option value="4503599627370496"></option><option value="4785074604081151"></option><option value="5066549580791807"></option><option value="5348024557502463"></option><option value="5629499534213119"></option><option value="5910974510923775"></option><option value="6192449487634431"></option><option value="6473924464345087"></option><option value="6755399441055743"></option><option value="7036874417766399"></option><option value="7318349394477055"></option><option value="7599824371187711"></option><option value="7881299347898367"></option><option value="8162774324609023"></option><option value="8444249301319679"></option><option value="8725724278030335"></option><option value="9007199254740991"></option></datalist></td><td class="buttons-col playable playing"><button class="play" type="button" title="Play">▶</button><button class="pause" type="button" title="Pause">❚❚</button><button class="extras" type="button" title="Additional options">≡</button></td></tr></table></div></div><div class="extras-menu repeat forward"><button class="once" type="button"><span>×1</span>Play once</button><button class="repeat" type="button"><span>∞</span>Repeat</button><button class="pingpong" type="button"><span>↹</span>Ping-pong</button><hr><button class="forward" type="button"><span>→</span>Play forwards</button><button class="backward" type="button"><span>←</span>Play backwards</button><hr><button class="faster" type="button"><span>+</span>Increase speed</button><button class="slower" type="button"><span>-</span>Decrease speed</button></div></body></html>
