@@ -3,6 +3,19 @@
 <title>Three.js Animation Examples</title>
 <body>
 
+<h3><a href="simpler.html">New, simpler version of the animation branch</a></h3>
+<pre>
+sage: def build_frame(t):
+....:     e = parametric_plot3d([sin(x-t), 0, x], (x, 0, 2*pi), color='red')
+....:     m = parametric_plot3d([0, -sin(x-t), x], (x, 0, 2*pi), color='green')
+....:     return e + m
+sage: frames = [build_frame(t) for t in (0, pi/32, pi/16, .., 2*pi)]
+sage: plot = animate(frames).interactive()
+sage: show(plot, delay=5, auto_play=False, projection='orthographic')
+</pre>
+
+<hr/>
+
 <h3><a href="moving_point1.html">A moving point using animate3d</a></h3>
 <pre>
 sage: p(u) = (sin(u), cos(u), sin(u)*cos(u))
