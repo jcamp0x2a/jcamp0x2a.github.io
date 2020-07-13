@@ -184,15 +184,9 @@ input[type=range].slider:focus::-ms-fill-upper {
 
 <body>
 
-<script src="/nbextensions/threejs/build/three.min.js"></script>
-<script src="/nbextensions/threejs/examples/js/controls/OrbitControls.js"></script>
-<script>
-  if ( !window.THREE ) document.write(' \
-<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/build/three.min.js"><\/script> \
-<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r110/examples/js/controls/OrbitControls.js"><\/script> \
-            ');
-</script>
-        
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r117/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r117/examples/js/controls/OrbitControls.js"></script>
+            
 <script>
 
     var scene = new THREE.Scene();
@@ -203,7 +197,7 @@ input[type=range].slider:focus::-ms-fill-upper {
     renderer.setClearColor( 0xffffff, 1 );
     document.body.appendChild( renderer.domElement );
 
-    var options = {"animate": true, "animationControls": true, "aspectRatio": [1.0, 1.0, 1.0], "autoPlay": false, "axes": false, "axesLabels": ["x", "y", "z"], "decimals": 2, "delay": 5, "frame": true, "loop": true, "projection": "orthographic"};
+    var options = {"animate": true, "animationControls": true, "aspectRatio": [1.0, 1.0, 1.0], "autoPlay": false, "axes": false, "axesLabels": ["x", "y", "z"], "decimals": 2, "delay": 5, "frame": true, "loop": true, "projection": "orthographic", "viewpoint": false};
     var animate = options.animate;
 
     var b = [{"x":-1.0, "y":-1.0, "z":0.0}, {"x":1.0, "y":1.0, "z":6.283185307179586}]; // bounds
@@ -297,10 +291,10 @@ input[type=range].slider:focus::-ms-fill-upper {
         var sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: texture } ) );
         sprite.position.set( x, y, z );
 
-        // Set the initial scale based on plot size to accomodate orthographic projection.
+        // Set the initial scale based on plot size to accommodate orthographic projection.
         // For other projections, the scale will get reset each frame based on camera distance.
         var scale = midToCorner/2;
-        sprite.scale.set( scale, scale*.25 ); // ratio of canvas width to height
+        sprite.scale.set( scale, scale*.25, 1 ); // ratio of canvas width to height
 
         scene.add( sprite );
 
@@ -312,7 +306,23 @@ input[type=range].slider:focus::-ms-fill-upper {
 
     var camera = createCamera();
     camera.up.set( 0, 0, 1 );
-    camera.position.set( a[0]*(xMid+xRange), a[1]*(yMid+yRange), a[2]*(zMid+zRange) );
+    camera.position.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+
+    var offset = new THREE.Vector3( a[0]*xRange, a[1]*yRange, a[2]*zRange );
+
+    if ( options.viewpoint ) {
+
+        var aa = options.viewpoint;
+        var axis = new THREE.Vector3( aa[0][0], aa[0][1], aa[0][2] ).normalize();
+        var angle = aa[1] * Math.PI / 180;
+        var q = new THREE.Quaternion().setFromAxisAngle( axis, angle ).inverse();
+
+        offset.set( 0, 0, offset.length() );
+        offset.applyQuaternion( q );
+
+    }
+
+    camera.position.add( offset );
 
     function createCamera() {
 
@@ -475,12 +485,13 @@ input[type=range].slider:focus::-ms-fill-upper {
 
         var side = json.singleSide ? THREE.FrontSide : THREE.DoubleSide;
         var transparent = json.opacity < 1 ? true : false;
+        var flatShading = json.useFlatShading ? json.useFlatShading : false;
 
         var material = new THREE.MeshPhongMaterial( { side: side,
                                      color: useFaceColors ? 'white' : json.color,
                                      vertexColors: useFaceColors ? THREE.FaceColors : THREE.NoColors,
                                      transparent: transparent, opacity: json.opacity,
-                                     shininess: 20, flatShading: json.useFlatShading } );
+                                     shininess: 20, flatShading: flatShading } );
 
         var c = new THREE.Vector3();
         geometry.computeBoundingBox();
@@ -536,14 +547,14 @@ input[type=range].slider:focus::-ms-fill-upper {
         renderer.render( scene, camera );
 
         // Resize text based on distance from camera.
-        // Not neccessary for orthographic due to the nature of the projection (preserves sizes).
+        // Not necessary for orthographic due to the nature of the projection (preserves sizes).
         if ( !camera.isOrthographicCamera ) {
             for ( var i=0 ; i < scene.children.length ; i++ ) {
                 if ( scene.children[i].type === 'Sprite' ) {
                     var sprite = scene.children[i];
                     var adjust = scratch.addVectors( sprite.position, scene.position )
                                     .sub( camera.position ).length() / 5;
-                    sprite.scale.set( adjust, .25*adjust ); // ratio of canvas width to height
+                    sprite.scale.set( adjust, .25*adjust, 1 ); // ratio of canvas width to height
                 }
             }
         }
@@ -610,7 +621,7 @@ input[type=range].slider:focus::-ms-fill-upper {
 
     }
 
-</script><canvas width="2465" height="1000" style="width: 986px; height: 400px;" tabindex="0"></canvas>
+</script><canvas width="3840" height="1875" style="width: 1536px; height: 750px;" tabindex="0"></canvas>
 
 <div id="menu-container" onclick="toggleMenu()">ⓘ
 <div id="menu-message"></div>
@@ -668,17 +679,17 @@ Apache license version 2.0
         </button>
 
         <button class="slower" title="Decrease playback speed">
-            <!-- fast_forward (outline) -->
-            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
-                <rect fill="none" height="24" width="24"></rect>
-                <path d="M15,9.86L18.03,12L15,14.14V9.86 M6,9.86L9.03,12L6,14.14V9.86 M13,6v12l8.5-6L13,6L13,6z M4,6v12l8.5-6L4,6L4,6z"></path>
+            <!-- switch_right -->
+            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" fill="#3131ff" width="24" height="24">
+                <rect fill="none" width="24" height="24" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 24 24)"></rect>
+                <path d="M15.5,15.38V8.62L18.88,12L15.5,15.38 M14,19l7-7l-7-7V19L14,19z M10,19V5l-7,7L10,19z"></path>
             </svg>
         </button>
         <button class="faster" title="Increase playback speed">
-            <!-- fast_forward (filled) -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
-                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"></path>
-                <path d="M0 0h24v24H0z" fill="none"></path>
+            <!-- switch_left -->
+            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" fill="#3131ff" width="24" height="24">
+                <rect fill="none" height="24" width="24"></rect>
+                <path d="M8.5,8.62v6.76L5.12,12L8.5,8.62 M10,5l-7,7l7,7V5L10,5z M14,5v14l7-7L14,5z"></path>
             </svg>
         </button>
 
