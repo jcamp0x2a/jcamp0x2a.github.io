@@ -3,6 +3,17 @@
 <title>Three.js Animation Examples</title>
 <body>
 
+<h3><a href="dark_theme.html">Three.js dark theme example</a></h3>
+<pre>
+surface = dodecahedron(mesh=True, color='blue').scale(0.5)
+curve = parametric_plot3d([sin(x), cos(x), x/pi], (x, -pi, pi), color='red')
+points = point3d([random_vector(RR, 3) for i in range(0, 100)], color='green')
+text = text3d("Hello world!", (1, 1, 1), color='yellow')
+show(surface + curve + points + text, theme='dark')
+</pre>
+
+<hr/>
+
 <h3><a href="simpler.html">New, simpler version of the animation branch</a></h3>
 <pre>
 sage: def build_frame(t):
