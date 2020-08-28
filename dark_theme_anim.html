@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html><script>;!function(){function e(t,e){return"function"!=typeof t||t.replaced?t:(e.replaced=!0,e)}var n,r,o,u=0;if("undefined"!=typeof CustomEvent&&"function"==typeof window.dispatchEvent){function s(t){try{if("object"==typeof t&&(t=JSON.stringify(t)),"string"==typeof t)return window.dispatchEvent(new CustomEvent("lprequeststart",{detail:{data:t,requestID:++u}})),u}catch(t){}}function c(t){try{window.dispatchEvent(new CustomEvent("lprequestend",{detail:t}))}catch(t){}}"undefined"!=typeof XMLHttpRequest&&XMLHttpRequest.prototype&&XMLHttpRequest.prototype.send&&(XMLHttpRequest.prototype.send=e(XMLHttpRequest.prototype.send,(o=XMLHttpRequest.prototype.send,function(t){var e=this,n=s(t);return n&&e.addEventListener("loadend",function(){c({requestID:n,statusCode:e.status})}),o.apply(e,arguments)}))),"function"==typeof fetch&&(fetch=e(fetch,(r=fetch,function(t,e){var n=s(e),o=r.apply(this,arguments);if(n){function u(t){c({requestID:n,statusCode:t&&t.status})}o.then(u).catch(u)}return o})));function i(t){return e(t,function(){try{this.dispatchEvent(new CustomEvent("lpsubmit"))}catch(t){}return t.apply(this,arguments)})}function t(){if(document&&document.forms&&0<document.forms.length)for(var t=0;t<document.forms.length;++t)document.forms[t].submit=i(document.forms[t].submit)}document&&"interactive"===document.readyState||"complete"===document.readyState?t():window.addEventListener("DOMContentLoaded",t,!0),Document.prototype.createElement=e(Document.prototype.createElement,(n=Document.prototype.createElement,function(){var t=n.apply(this,arguments);return t&&"FORM"===t.nodeName&&t.submit&&(t.submit=i(t.submit)),t}))}}();</script><head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+
+    body { margin: 0px; overflow: hidden; }
+
+    #menu-container { position: absolute; bottom: 30px; right: 40px; cursor: default; }
+
+    #menu-message { position: absolute; bottom: 0px; right: 0px; white-space: nowrap;
+                    display: none; background-color: #F5F5F5; padding: 10px; }
+
+    #menu-content { position: absolute; bottom: 0px; right: 0px;
+                    display: none; background-color: #F5F5F5; border-bottom: 1px solid black;
+                    border-right: 1px solid black; border-left: 1px solid black; }
+
+    #menu-content div { border-top: 1px solid black; padding: 10px; white-space: nowrap; }
+
+    #menu-content div:hover { background-color: #FEFEFE; }
+
+    .dark-theme #menu-container { color: white; }
+
+    .dark-theme #menu-message { background-color: #181818; }
+
+    .dark-theme #menu-content { background-color: #181818; border-color: white; }
+
+    .dark-theme #menu-content div { border-color: white; }
+
+    .dark-theme #menu-content div:hover { background-color: #303030; }
+
+</style>
+<style>/* animation.css */
+
+#animation-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+#animation-ui .tick-marks {
+    height: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px; /* Take into account the slider knob/thumb's width. */
+    margin-right: 5px; /* Same, but save a pixel for the last tick mark. */
+    background-image: repeating-linear-gradient(
+        to right,
+        darkgray 0 1px, /* Make each tick 1px wide. */
+        /* -1px here because of that extra pixel on the right margin */
+        transparent 1px calc((100% - 1px) / 64)
+    );
+}
+
+#animation-ui,
+#animation-ui .buttons {
+    font-size: 0; /* hack to ignore white-space between inline-block elements */
+}
+
+#animation-ui button {
+    display: inline-block;
+    margin: 0;
+    padding: 2px;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: none;
+    border-radius: 28px;
+    cursor: pointer;
+}
+.dark-theme #animation-ui button {
+    padding: 1px;
+    border: 1px dotted black;
+}
+
+#animation-ui button:focus {
+    background: #b8b9ff;
+    outline: none;
+}
+.dark-theme #animation-ui button:focus {
+    background: none;
+    border-color: white;
+}
+
+/* Setting the outline to none isn't enough for Firefox. */
+#animation-ui button::-moz-focus-inner {
+    border: none;
+}
+
+#animation-ui button:active {
+    background: #efefff;
+}
+.dark-theme #animation-ui button:active {
+    background: #303030;
+    border-style: solid;
+}
+
+#animation-ui.playing .play,
+#animation-ui.paused .pause,
+#animation-ui.loop .once,
+#animation-ui.once .loop {
+    display: none;
+}
+
+/*
+Slider styled using range.css tool by Daniel Stern
+   http://danielstern.ca/range.css/#/
+   Generated April 24, 2020
+Customizations:
+    - darker focus color
+    - focused styling for Firefox.
+*/
+input[type=range].slider {
+    -webkit-appearance: none;
+    width: 100%;
+    margin: 0px 0;
+}
+input[type=range].slider:focus {
+    outline: none;
+}
+input[type=range].slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 12px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #efefff;
+    border-radius: 6px;
+    border: 0px solid #000000;
+}
+input[type=range].slider::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 12px;
+    width: 12px;
+    border-radius: 6px;
+    background: #3131ff;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: 0px;
+}
+input[type=range].slider:focus::-webkit-slider-runnable-track {
+    background: #b8b9f6;
+}
+input[type=range].slider::-moz-range-track {
+    width: 100%;
+    height: 12px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #efefff;
+    border-radius: 6px;
+    border: 0px solid #000000;
+}
+input[type=range].slider::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 12px;
+    width: 12px;
+    border-radius: 6px;
+    background: #3131ff;
+    cursor: pointer;
+}
+input[type=range].slider:focus::-moz-range-track {
+    background: #b8b9f6;
+}
+input[type=range].slider::-moz-focus-outer {
+    border: none;
+}
+input[type=range].slider::-ms-track {
+    width: 100%;
+    height: 12px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+input[type=range].slider::-ms-fill-lower {
+    background: #efefff;
+    border: 0px solid #000000;
+    border-radius: 6px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range].slider::-ms-fill-upper {
+    background: #efefff;
+    border: 0px solid #000000;
+    border-radius: 6px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range].slider::-ms-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    width: 12px;
+    border-radius: 6px;
+    background: #3131ff;
+    cursor: pointer;
+    height: 12px;
+}
+input[type=range].slider:focus::-ms-fill-lower {
+    background: #b8b9f6;
+}
+input[type=range].slider:focus::-ms-fill-upper {
+    background: #b8b9f6;
+}
+
+.dark-theme input[type=range].slider {
+    background: black;
+}
+.dark-theme input[type=range].slider::-webkit-slider-runnable-track {
+    background: #303030;
+}
+.dark-theme input[type=range].slider:focus::-webkit-slider-thumb {
+    border: 1px dotted white;
+}
+.dark-theme input[type=range].slider::-moz-range-track {
+    background: #303030;
+}
+.dark-theme input[type=range].slider:focus::-moz-range-thumb {
+    border: 1px dotted white;
+}
+.dark-theme input[type=range].slider::-ms-fill-lower {
+    background: #303030;
+}
+.dark-theme input[type=range].slider::-ms-fill-upper {
+    background: #303030;
+}
+.dark-theme input[type=range].slider:focus::-ms-thumb {
+    border: 1px dotted white;
+}
+</style>
+</head>
+
+<body class="dark-theme">
+
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r117/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r117/examples/js/controls/OrbitControls.js"></script>
+            
+<script>
+
+    var options = {"animate": true, "animationControls": true, "aspectRatio": [1.0, 1.0, 1.0], "autoPlay": true, "axes": false, "axesLabels": ["x", "y", "z"], "decimals": 2, "delay": 5, "frame": true, "loop": true, "projection": "perspective", "theme": "dark", "viewpoint": false};
+    var animate = options.animate;
+
+    if ( options.theme === 'dark' )
+        document.body.className = 'dark-theme';
+
+    var scene = new THREE.Scene();
+
+    var renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( options.theme === 'dark' ? 0 : 0xffffff, 1 );
+    document.body.appendChild( renderer.domElement );
+
+    var b = [{"x":-1.2776361387602089, "y":-1.2776361387602089, "z":-1.0}, {"x":1.2776361387602089, "y":1.2776361387602089, "z":1.0}]; // bounds
+
+    if ( b[0].x === b[1].x ) {
+        b[0].x -= 1;
+        b[1].x += 1;
+    }
+    if ( b[0].y === b[1].y ) {
+        b[0].y -= 1;
+        b[1].y += 1;
+    }
+    if ( b[0].z === b[1].z ) {
+        b[0].z -= 1;
+        b[1].z += 1;
+    }
+
+    var rRange = Math.sqrt( Math.pow( b[1].x - b[0].x, 2 )
+                            + Math.pow( b[1].y - b[0].y, 2 ) );
+    var xRange = b[1].x - b[0].x;
+    var yRange = b[1].y - b[0].y;
+    var zRange = b[1].z - b[0].z;
+
+    var ar = options.aspectRatio;
+    var a = [ ar[0], ar[1], ar[2] ]; // aspect multipliers
+    var autoAspect = 2.5;
+    if ( zRange > autoAspect * rRange && a[2] === 1 ) a[2] = autoAspect * rRange / zRange;
+
+    // Distance from (xMid,yMid,zMid) to any corner of the bounding box, after applying aspectRatio
+    var midToCorner = Math.sqrt( a[0]*a[0]*xRange*xRange + a[1]*a[1]*yRange*yRange + a[2]*a[2]*zRange*zRange ) / 2;
+
+    var xMid = ( b[0].x + b[1].x ) / 2;
+    var yMid = ( b[0].y + b[1].y ) / 2;
+    var zMid = ( b[0].z + b[1].z ) / 2;
+
+    var box = new THREE.Geometry();
+    box.vertices.push( new THREE.Vector3( a[0]*b[0].x, a[1]*b[0].y, a[2]*b[0].z ) );
+    box.vertices.push( new THREE.Vector3( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) );
+    var boxMesh = new THREE.Line( box );
+    var boxColor = ( options.theme === 'dark' ) ? 'white': 'black';
+    if ( options.frame ) scene.add( new THREE.BoxHelper( boxMesh, boxColor ) );
+
+    if ( options.axesLabels ) {
+
+        var d = options.decimals; // decimals
+        var offsetRatio = 0.1;
+        var al = options.axesLabels;
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var xm = xMid.toFixed(d);
+        if ( /^-0.?0*$/.test(xm) ) xm = xm.substr(1);
+        addLabel( al[0] + '=' + xm, a[0]*xMid, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[0].x ).toFixed(d), a[0]*b[0].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+        addLabel( ( b[1].x ).toFixed(d), a[0]*b[1].x, a[1]*b[1].y+offset, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[0]*( b[1].x - b[0].x );
+        var ym = yMid.toFixed(d);
+        if ( /^-0.?0*$/.test(ym) ) ym = ym.substr(1);
+        addLabel( al[1] + '=' + ym, a[0]*b[1].x+offset, a[1]*yMid, a[2]*b[0].z );
+        addLabel( ( b[0].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[0].y, a[2]*b[0].z );
+        addLabel( ( b[1].y ).toFixed(d), a[0]*b[1].x+offset, a[1]*b[1].y, a[2]*b[0].z );
+
+        var offset = offsetRatio * a[1]*( b[1].y - b[0].y );
+        var zm = zMid.toFixed(d);
+        if ( /^-0.?0*$/.test(zm) ) zm = zm.substr(1);
+        addLabel( al[2] + '=' + zm, a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*zMid );
+        addLabel( ( b[0].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[0].z );
+        addLabel( ( b[1].z ).toFixed(d), a[0]*b[1].x, a[1]*b[0].y-offset, a[2]*b[1].z );
+
+    }
+
+    function addLabel( text, x, y, z, color='black', fontsize=14 ) {
+
+        if ( options.theme === 'dark' )
+            if ( color === 'black' || color === '#000' || color === '#000000' )
+                color = 'white';
+
+        var canvas = document.createElement( 'canvas' );
+        var context = canvas.getContext( '2d' );
+        var pixelRatio = Math.round( window.devicePixelRatio );
+
+        context.font = fontsize + 'px monospace';
+        var width = context.measureText( text ).width;
+        var height = fontsize;
+
+        // The dimensions of the canvas's underlying image data need to be powers
+        // of two in order for the resulting texture to support mipmapping.
+        canvas.width = THREE.MathUtils.ceilPowerOfTwo( width * pixelRatio );
+        canvas.height = THREE.MathUtils.ceilPowerOfTwo( height * pixelRatio );
+
+        // Re-compute the unscaled dimensions after the power of two conversion.
+        width = canvas.width / pixelRatio;
+        height = canvas.height / pixelRatio;
+
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        context.scale( pixelRatio, pixelRatio );
+        context.fillStyle = color;
+        context.font = fontsize + 'px monospace'; // Must be set again after measureText.
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText( text, width/2, height/2 );
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var materialOptions = { map: texture, sizeAttenuation: false };
+        var sprite = new THREE.Sprite( new THREE.SpriteMaterial( materialOptions ) );
+        sprite.position.set( x, y, z );
+
+        // Scaling factor, chosen somewhat arbitrarily so that the size of the text
+        // is consistent with previously generated plots.
+        var scale = 1/625;
+        if ( options.projection === 'orthographic' ) {
+            scale = midToCorner/256; // Needs to scale along with the plot itself.
+        }
+        sprite.scale.set( scale * width, scale * height, 1 );
+
+        scene.add( sprite );
+
+        return sprite;
+
+    }
+
+    if ( options.axes ) scene.add( new THREE.AxesHelper( Math.min( a[0]*b[1].x, a[1]*b[1].y, a[2]*b[1].z ) ) );
+
+    var camera = createCamera();
+    camera.up.set( 0, 0, 1 );
+    camera.position.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+
+    var offset = new THREE.Vector3( a[0]*xRange, a[1]*yRange, a[2]*zRange );
+
+    if ( options.viewpoint ) {
+
+        var aa = options.viewpoint;
+        var axis = new THREE.Vector3( aa[0][0], aa[0][1], aa[0][2] ).normalize();
+        var angle = aa[1] * Math.PI / 180;
+        var q = new THREE.Quaternion().setFromAxisAngle( axis, angle ).inverse();
+
+        offset.set( 0, 0, offset.length() );
+        offset.applyQuaternion( q );
+
+    }
+
+    camera.position.add( offset );
+
+    function createCamera() {
+
+        var aspect = window.innerWidth / window.innerHeight;
+
+        if ( options.projection === 'orthographic' ) {
+            var camera = new THREE.OrthographicCamera( -1, 1, 1, -1, -1000, 1000 );
+            updateCameraAspect( camera, aspect );
+            return camera;
+        }
+
+        return new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000 );
+
+    }
+
+    function updateCameraAspect( camera, aspect ) {
+
+        if ( camera.isPerspectiveCamera ) {
+            camera.aspect = aspect;
+        } else if ( camera.isOrthographicCamera ) {
+            // Fit the camera frustum to the bounding box's diagonal so that the entire plot fits
+            // within at the default zoom level and camera position.
+            if ( aspect > 1 ) { // Wide window
+                camera.top = midToCorner;
+                camera.right = midToCorner * aspect;
+            } else { // Tall or square window
+                camera.top = midToCorner / aspect;
+                camera.right = midToCorner;
+            }
+            camera.bottom = -camera.top;
+            camera.left = -camera.right;
+        }
+
+        camera.updateProjectionMatrix();
+
+    }
+
+    var lights = [{"x":-5, "y":3, "z":0, "color":"#7f7f7f", "parent":"camera"}];
+    for ( var i=0 ; i < lights.length ; i++ ) {
+        var light = new THREE.DirectionalLight( lights[i].color, 1 );
+        light.position.set( a[0]*lights[i].x, a[1]*lights[i].y, a[2]*lights[i].z );
+        if ( lights[i].parent === 'camera' ) {
+            light.target.position.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+            scene.add( light.target );
+            camera.add( light );
+        } else scene.add( light );
+    }
+    scene.add( camera );
+
+    var ambient = {"color":"#7f7f7f"};
+    scene.add( new THREE.AmbientLight( ambient.color, 1 ) );
+
+    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.target.set( a[0]*xMid, a[1]*yMid, a[2]*zMid );
+    controls.addEventListener( 'change', function() { if ( !animate ) render(); } );
+
+    window.addEventListener( 'resize', function() {
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        updateCameraAspect( camera, window.innerWidth / window.innerHeight );
+        if ( !animate ) render();
+
+    } );
+
+    var texts = [];
+    for ( var i=0 ; i < texts.length ; i++ ) addText( texts[i] );
+
+    function addText( json ) {
+        var sprite = addLabel( json.text, a[0]*json.x, a[1]*json.y, a[2]*json.z, json.color );
+        sprite.userData = json;
+    }
+
+    var points = [];
+    for ( var i=0 ; i < points.length ; i++ ) addPoint( points[i] );
+
+    function addPoint( json ) {
+
+        var geometry = new THREE.Geometry();
+        var v = json.point;
+        geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = 128;
+        canvas.height = 128;
+
+        var context = canvas.getContext( '2d' );
+        context.arc( 64, 64, 64, 0, 2 * Math.PI );
+        context.fillStyle = json.color;
+        context.fill();
+
+        var texture = new THREE.Texture( canvas );
+        texture.needsUpdate = true;
+
+        var transparent = json.opacity < 1 ? true : false;
+        var size = camera.isOrthographicCamera ? json.size : json.size/100;
+        var material = new THREE.PointsMaterial( { size: size, map: texture,
+                                                   transparent: transparent, opacity: json.opacity,
+                                                   alphaTest: .1 } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Points( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        mesh.userData = json;
+        scene.add( mesh );
+
+    }
+
+    var lines = [];
+    for ( var i=0 ; i < lines.length ; i++ ) addLine( lines[i] );
+
+    function addLine( json ) {
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.points.length ; i++ ) {
+            var v = json.points[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v[0], a[1]*v[1], a[2]*v[2] ) );
+        }
+
+        var transparent = json.opacity < 1 ? true : false;
+        var material = new THREE.LineBasicMaterial( { color: json.color, linewidth: json.linewidth,
+                                                      transparent: transparent, opacity: json.opacity } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Line( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        mesh.userData = json;
+        scene.add( mesh );
+
+    }
+
+    var surfaces = [{"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6666666666666666, "y": 0.0, "z": 0.7453559924999299}, {"x": -0.3333333333333333, "y": 0.5773502691896257, "z": 0.7453559924999299}, {"x": -0.33333333333333326, "y": -0.5773502691896257, "z": 0.7453559924999299}, {"x": 0.7453559924999299, "y": 0.5773502691896258, "z": 0.3333333333333333}, {"x": 0.12732200375003505, "y": 0.9341723589627158, "z": 0.3333333333333333}, {"x": -0.8726779962499649, "y": 0.3568220897730899, "z": 0.3333333333333333}, {"x": -0.8726779962499649, "y": -0.35682208977308993, "z": 0.3333333333333333}, {"x": 0.1273220037500351, "y": -0.9341723589627157, "z": 0.3333333333333333}, {"x": 0.7453559924999299, "y": -0.5773502691896258, "z": 0.3333333333333333}, {"x": -0.7453559924999299, "y": 0.5773502691896258, "z": -0.3333333333333333}, {"x": -0.1273220037500351, "y": 0.9341723589627157, "z": -0.3333333333333333}, {"x": 0.8726779962499649, "y": 0.35682208977308993, "z": -0.3333333333333333}, {"x": 0.8726779962499649, "y": -0.3568220897730899, "z": -0.3333333333333333}, {"x": -0.12732200375003505, "y": -0.9341723589627158, "z": -0.3333333333333333}, {"x": -0.7453559924999299, "y": -0.5773502691896258, "z": -0.3333333333333333}, {"x": 0.33333333333333326, "y": 0.5773502691896257, "z": -0.7453559924999299}, {"x": 0.3333333333333333, "y": -0.5773502691896257, "z": -0.7453559924999299}, {"x": -0.6666666666666666, "y": 0.0, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 0}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6634564844481312, "y": -0.06534476021970706, "z": 0.7453559924999299}, {"x": -0.27513801986959646, "y": 0.6072425499474505, "z": 0.7453559924999299}, {"x": -0.3883184645785347, "y": -0.5418977897277435, "z": 0.7453559924999299}, {"x": 0.798357122023996, "y": 0.5015125069252526, "z": 0.3333333333333333}, {"x": 0.21827381670178025, "y": 0.9171943250104236, "z": 0.3333333333333333}, {"x": -0.8335011323248858, "y": 0.4406412955023871, "z": 0.3333333333333333}, {"x": -0.9034504940168377, "y": -0.269566492260482, "z": 0.3333333333333333}, {"x": 0.035144010300889955, "y": -0.9421538024276397, "z": 0.3333333333333333}, {"x": 0.6851766773150576, "y": -0.6476278327499416, "z": 0.3333333333333333}, {"x": -0.6851766773150576, "y": 0.6476278327499416, "z": -0.3333333333333333}, {"x": -0.035144010300889955, "y": 0.9421538024276397, "z": -0.3333333333333333}, {"x": 0.9034504940168377, "y": 0.269566492260482, "z": -0.3333333333333333}, {"x": 0.8335011323248858, "y": -0.4406412955023871, "z": -0.3333333333333333}, {"x": -0.21827381670178025, "y": -0.9171943250104236, "z": -0.3333333333333333}, {"x": -0.798357122023996, "y": -0.5015125069252526, "z": -0.3333333333333333}, {"x": 0.3883184645785347, "y": 0.5418977897277435, "z": -0.7453559924999299}, {"x": 0.27513801986959646, "y": -0.6072425499474505, "z": -0.7453559924999299}, {"x": -0.6634564844481312, "y": 0.06534476021970706, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 1}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6538568536021536, "y": -0.13006021467741882, "z": 0.7453559924999299}, {"x": -0.2142929768687744, "y": 0.6312867529967371, "z": 0.7453559924999299}, {"x": -0.43956387673337916, "y": -0.5012265383193183, "z": 0.7453559924999299}, {"x": 0.8436696360365743, "y": 0.4208449050645656, "z": 0.3333333333333333}, {"x": 0.30712353347808163, "y": 0.8913832083188613, "z": 0.3333333333333333}, {"x": -0.7862971968574511, "y": 0.5202168846769618, "z": 0.3333333333333333}, {"x": -0.925522269650051, "y": -0.17971482206737147, "z": 0.3333333333333333}, {"x": -0.057372439179123005, "y": -0.9410617897415274, "z": 0.3333333333333333}, {"x": 0.6183987361719694, "y": -0.71166838625149, "z": 0.3333333333333333}, {"x": -0.6183987361719694, "y": 0.71166838625149, "z": -0.3333333333333333}, {"x": 0.057372439179123005, "y": 0.9410617897415274, "z": -0.3333333333333333}, {"x": 0.925522269650051, "y": 0.17971482206737147, "z": -0.3333333333333333}, {"x": 0.7862971968574511, "y": -0.5202168846769618, "z": -0.3333333333333333}, {"x": -0.30712353347808163, "y": -0.8913832083188613, "z": -0.3333333333333333}, {"x": -0.8436696360365743, "y": -0.4208449050645656, "z": -0.3333333333333333}, {"x": 0.43956387673337916, "y": 0.5012265383193183, "z": -0.7453559924999299}, {"x": 0.2142929768687744, "y": -0.6312867529967371, "z": -0.7453559924999299}, {"x": -0.6538568536021536, "y": 0.13006021467741882, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 2}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6379602238214725, "y": -0.19352311816964154, "z": 0.7453559924999299}, {"x": -0.15138417535624882, "y": 0.6492513195182223, "z": 0.7453559924999299}, {"x": -0.4865760484652237, "y": -0.45572820134858083, "z": 0.7453559924999299}, {"x": 0.8808571502573841, "y": 0.3361243367108801, "z": 0.3333333333333333}, {"x": 0.39301548273618775, "y": 0.8569875840515604, "z": 0.3333333333333333}, {"x": -0.7315207895505086, "y": 0.594782500872621, "z": 0.3333333333333333}, {"x": -0.938680759884597, "y": -0.08813239989563709, "z": 0.3333333333333333}, {"x": -0.1493363607068755, "y": -0.930906837583501, "z": 0.3333333333333333}, {"x": 0.5456652771484092, "y": -0.7688551841559232, "z": 0.3333333333333333}, {"x": -0.5456652771484092, "y": 0.7688551841559232, "z": -0.3333333333333333}, {"x": 0.1493363607068755, "y": 0.930906837583501, "z": -0.3333333333333333}, {"x": 0.938680759884597, "y": 0.08813239989563709, "z": -0.3333333333333333}, {"x": 0.7315207895505086, "y": -0.594782500872621, "z": -0.3333333333333333}, {"x": -0.39301548273618775, "y": -0.8569875840515604, "z": -0.3333333333333333}, {"x": -0.8808571502573841, "y": -0.3361243367108801, "z": -0.3333333333333333}, {"x": 0.4865760484652237, "y": 0.45572820134858083, "z": -0.7453559924999299}, {"x": 0.15138417535624882, "y": -0.6492513195182223, "z": -0.7453559924999299}, {"x": -0.6379602238214725, "y": 0.19352311816964154, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 3}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6159196883408578, "y": -0.25512228824339317, "z": 0.7453559924999299}, {"x": -0.08701746148003436, "y": 0.6609632409158736, "z": 0.7453559924999299}, {"x": -0.5289022268608233, "y": -0.4058409526724804, "z": 0.7453559924999299}, {"x": 0.9095615285957159, "y": 0.24816670725041579, "z": 0.3333333333333333}, {"x": 0.4751224780514275, "y": 0.8143387008727756, "z": 0.3333333333333333}, {"x": -0.6696994371502538, "y": 0.6636200364436882, "z": 0.3333333333333333}, {"x": -0.9427992412663543, "y": 0.004298785465162769, "z": 0.3333333333333333}, {"x": -0.23986209144546206, "y": -0.911786743694104, "z": 0.3333333333333333}, {"x": 0.4676767632149268, "y": -0.8186374863379383, "z": 0.3333333333333333}, {"x": -0.4676767632149268, "y": 0.8186374863379383, "z": -0.3333333333333333}, {"x": 0.23986209144546206, "y": 0.911786743694104, "z": -0.3333333333333333}, {"x": 0.9427992412663543, "y": -0.004298785465162769, "z": -0.3333333333333333}, {"x": 0.6696994371502538, "y": -0.6636200364436882, "z": -0.3333333333333333}, {"x": -0.4751224780514275, "y": -0.8143387008727756, "z": -0.3333333333333333}, {"x": -0.9095615285957159, "y": -0.24816670725041579, "z": -0.3333333333333333}, {"x": 0.5289022268608233, "y": 0.4058409526724804, "z": -0.7453559924999299}, {"x": 0.08701746148003436, "y": -0.6609632409158736, "z": -0.7453559924999299}, {"x": -0.6159196883408578, "y": 0.25512228824339317, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 4}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.58794750956557, "y": -0.31426449121733174, "z": 0.7453559924999299}, {"x": -0.021812721881184105, "y": 0.6663097249842438, "z": 0.7453559924999299}, {"x": -0.5661347876843859, "y": -0.35204523376691205, "z": 0.7453559924999299}, {"x": 0.929506332196762, "y": 0.1578190967374083, "z": 0.3333333333333333}, {"x": 0.5526537841746656, "y": 0.7638472908417697, "z": 0.3333333333333333}, {"x": -0.6014285130752903, "y": 0.7260665482921893, "z": 0.3333333333333333}, {"x": -0.9378380505682258, "y": 0.09668857117197793, "z": 0.3333333333333333}, {"x": -0.3280778191214717, "y": -0.8838856450295977, "z": 0.3333333333333333}, {"x": 0.38518426639356024, "y": -0.8605358620137478, "z": 0.3333333333333333}, {"x": -0.38518426639356024, "y": 0.8605358620137478, "z": -0.3333333333333333}, {"x": 0.3280778191214717, "y": 0.8838856450295977, "z": -0.3333333333333333}, {"x": 0.9378380505682258, "y": -0.09668857117197793, "z": -0.3333333333333333}, {"x": 0.6014285130752903, "y": -0.7260665482921893, "z": -0.3333333333333333}, {"x": -0.5526537841746656, "y": -0.7638472908417697, "z": -0.3333333333333333}, {"x": -0.929506332196762, "y": -0.1578190967374083, "z": -0.3333333333333333}, {"x": 0.5661347876843859, "y": 0.35204523376691205, "z": -0.7453559924999299}, {"x": 0.021812721881184105, "y": -0.6663097249842438, "z": -0.7453559924999299}, {"x": -0.58794750956557, "y": 0.31426449121733174, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 5}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.5543130748683635, "y": -0.37038015534640145, "z": 0.7453559924999299}, {"x": 0.0436020861534287, "y": 0.6652392821590689, "z": 0.7453559924999299}, {"x": -0.5979151610217921, "y": -0.29485912681266757, "z": 0.7453559924999299}, {"x": 0.9404994816989061, "y": 0.06595160205012546, "z": 0.3333333333333333}, {"x": 0.6248627322450122, "y": 0.7059996138385538, "z": 0.3333333333333333}, {"x": -0.5273655036451433, "y": 0.7815206423722876, "z": 0.3333333333333333}, {"x": -0.9238449667686973, "y": 0.18814719308305744, "z": 0.3333333333333333}, {"x": -0.4131339780537625, "y": -0.847472244422413, "z": 0.3333333333333333}, {"x": 0.29898223452368505, "y": -0.8941468069216112, "z": 0.3333333333333333}, {"x": -0.29898223452368505, "y": 0.8941468069216112, "z": -0.3333333333333333}, {"x": 0.4131339780537625, "y": 0.847472244422413, "z": -0.3333333333333333}, {"x": 0.9238449667686973, "y": -0.18814719308305744, "z": -0.3333333333333333}, {"x": 0.5273655036451433, "y": -0.7815206423722876, "z": -0.3333333333333333}, {"x": -0.6248627322450122, "y": -0.7059996138385538, "z": -0.3333333333333333}, {"x": -0.9404994816989061, "y": -0.06595160205012546, "z": -0.3333333333333333}, {"x": 0.5979151610217921, "y": 0.29485912681266757, "z": -0.7453559924999299}, {"x": -0.0436020861534287, "y": -0.6652392821590689, "z": -0.7453559924999299}, {"x": -0.5543130748683635, "y": 0.37038015534640145, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 6}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.5153403022418246, "y": -0.422928856109097, "z": 0.7453559924999299}, {"x": 0.10859698226305914, "y": 0.6577622213899194, "z": 0.7453559924999299}, {"x": -0.6239372845048837, "y": -0.23483336528082238, "z": 0.7453559924999299}, {"x": 0.9424351070629752, "y": -0.026551042617713128, "z": 0.3333333333333333}, {"x": 0.6910539106191239, "y": 0.6413527746154257, "z": 0.3333333333333333}, {"x": -0.44822367612758457, "y": 0.8294482654437002, "z": 0.3333333333333333}, {"x": -0.9009547509141559, "y": 0.27779385467302925, "z": 0.3333333333333333}, {"x": -0.4942114309353904, "y": -0.8028972228259871, "z": 0.3333333333333333}, {"x": 0.2099008402950321, "y": -0.9191466292884549, "z": 0.3333333333333333}, {"x": -0.2099008402950321, "y": 0.9191466292884549, "z": -0.3333333333333333}, {"x": 0.4942114309353904, "y": 0.8028972228259871, "z": -0.3333333333333333}, {"x": 0.9009547509141559, "y": -0.27779385467302925, "z": -0.3333333333333333}, {"x": 0.44822367612758457, "y": -0.8294482654437002, "z": -0.3333333333333333}, {"x": -0.6910539106191239, "y": -0.6413527746154257, "z": -0.3333333333333333}, {"x": -0.9424351070629752, "y": 0.026551042617713128, "z": -0.3333333333333333}, {"x": 0.6239372845048837, "y": 0.23483336528082238, "z": -0.7453559924999299}, {"x": -0.10859698226305914, "y": -0.6577622213899194, "z": -0.7453559924999299}, {"x": -0.5153403022418246, "y": 0.422928856109097, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 7}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.4714045207910317, "y": -0.4714045207910316, "z": 0.7453559924999299}, {"x": 0.17254603006834712, "y": 0.6439505508593788, "z": 0.7453559924999299}, {"x": -0.6439505508593788, "y": -0.17254603006834726, "z": 0.7453559924999299}, {"x": 0.9352945671585929, "y": -0.11879798623086674, "z": 0.3333333333333333}, {"x": 0.7505898620654787, "y": 0.5705293575736613, "z": 0.3333333333333333}, {"x": -0.3647652095849318, "y": 0.8693878482963455, "z": 0.3333333333333333}, {"x": -0.8693878482963455, "y": 0.36476520958493164, "z": 0.3333333333333333}, {"x": -0.570529357573661, "y": -0.7505898620654788, "z": 0.3333333333333333}, {"x": 0.1187979862308669, "y": -0.9352945671585928, "z": 0.3333333333333333}, {"x": -0.1187979862308669, "y": 0.9352945671585928, "z": -0.3333333333333333}, {"x": 0.570529357573661, "y": 0.7505898620654788, "z": -0.3333333333333333}, {"x": 0.8693878482963455, "y": -0.36476520958493164, "z": -0.3333333333333333}, {"x": 0.3647652095849318, "y": -0.8693878482963455, "z": -0.3333333333333333}, {"x": -0.7505898620654787, "y": -0.5705293575736613, "z": -0.3333333333333333}, {"x": -0.9352945671585929, "y": 0.11879798623086674, "z": -0.3333333333333333}, {"x": 0.6439505508593788, "y": 0.17254603006834726, "z": -0.7453559924999299}, {"x": -0.17254603006834712, "y": -0.6439505508593788, "z": -0.7453559924999299}, {"x": -0.4714045207910317, "y": 0.4714045207910316, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 8}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.422928856109097, "y": -0.5153403022418246, "z": 0.7453559924999299}, {"x": 0.23483336528082235, "y": 0.6239372845048837, "z": 0.7453559924999299}, {"x": -0.6577622213899192, "y": -0.10859698226305914, "z": 0.7453559924999299}, {"x": 0.9191466292884549, "y": -0.2099008402950321, "z": 0.3333333333333333}, {"x": 0.8028972228259872, "y": 0.49421143093539055, "z": 0.3333333333333333}, {"x": -0.2777938546730293, "y": 0.9009547509141558, "z": 0.3333333333333333}, {"x": -0.8294482654437003, "y": 0.4482236761275845, "z": 0.3333333333333333}, {"x": -0.6413527746154256, "y": -0.6910539106191238, "z": 0.3333333333333333}, {"x": 0.026551042617713128, "y": -0.9424351070629752, "z": 0.3333333333333333}, {"x": -0.026551042617713128, "y": 0.9424351070629752, "z": -0.3333333333333333}, {"x": 0.6413527746154256, "y": 0.6910539106191238, "z": -0.3333333333333333}, {"x": 0.8294482654437003, "y": -0.4482236761275845, "z": -0.3333333333333333}, {"x": 0.2777938546730293, "y": -0.9009547509141558, "z": -0.3333333333333333}, {"x": -0.8028972228259872, "y": -0.49421143093539055, "z": -0.3333333333333333}, {"x": -0.9191466292884549, "y": 0.2099008402950321, "z": -0.3333333333333333}, {"x": 0.6577622213899192, "y": 0.10859698226305914, "z": -0.7453559924999299}, {"x": -0.23483336528082235, "y": -0.6239372845048837, "z": -0.7453559924999299}, {"x": -0.422928856109097, "y": 0.5153403022418246, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 9}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.3703801553464015, "y": -0.5543130748683635, "z": 0.7453559924999299}, {"x": 0.29485912681266746, "y": 0.5979151610217922, "z": 0.7453559924999299}, {"x": -0.6652392821590689, "y": -0.04360208615342881, "z": 0.7453559924999299}, {"x": 0.8941468069216114, "y": -0.298982234523685, "z": 0.3333333333333333}, {"x": 0.8474722444224131, "y": 0.4131339780537627, "z": 0.3333333333333333}, {"x": -0.18814719308305755, "y": 0.9238449667686973, "z": 0.3333333333333333}, {"x": -0.7815206423722877, "y": 0.5273655036451433, "z": 0.3333333333333333}, {"x": -0.7059996138385536, "y": -0.6248627322450124, "z": 0.3333333333333333}, {"x": -0.06595160205012535, "y": -0.9404994816989061, "z": 0.3333333333333333}, {"x": 0.06595160205012535, "y": 0.9404994816989061, "z": -0.3333333333333333}, {"x": 0.7059996138385536, "y": 0.6248627322450124, "z": -0.3333333333333333}, {"x": 0.7815206423722877, "y": -0.5273655036451433, "z": -0.3333333333333333}, {"x": 0.18814719308305755, "y": -0.9238449667686973, "z": -0.3333333333333333}, {"x": -0.8474722444224131, "y": -0.4131339780537627, "z": -0.3333333333333333}, {"x": -0.8941468069216114, "y": 0.298982234523685, "z": -0.3333333333333333}, {"x": 0.6652392821590689, "y": 0.04360208615342881, "z": -0.7453559924999299}, {"x": -0.29485912681266746, "y": -0.5979151610217922, "z": -0.7453559924999299}, {"x": -0.3703801553464015, "y": 0.5543130748683635, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 10}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.31426449121733185, "y": -0.58794750956557, "z": 0.7453559924999299}, {"x": 0.3520452337669119, "y": 0.566134787684386, "z": 0.7453559924999299}, {"x": -0.6663097249842437, "y": 0.02181272188118394, "z": 0.7453559924999299}, {"x": 0.8605358620137478, "y": -0.3851842663935601, "z": 0.3333333333333333}, {"x": 0.8838856450295977, "y": 0.328077819121472, "z": 0.3333333333333333}, {"x": -0.09668857117197815, "y": 0.9378380505682258, "z": 0.3333333333333333}, {"x": -0.7260665482921895, "y": 0.6014285130752901, "z": 0.3333333333333333}, {"x": -0.7638472908417695, "y": -0.5526537841746658, "z": 0.3333333333333333}, {"x": -0.15781909673740802, "y": -0.9295063321967623, "z": 0.3333333333333333}, {"x": 0.15781909673740802, "y": 0.9295063321967623, "z": -0.3333333333333333}, {"x": 0.7638472908417695, "y": 0.5526537841746658, "z": -0.3333333333333333}, {"x": 0.7260665482921895, "y": -0.6014285130752901, "z": -0.3333333333333333}, {"x": 0.09668857117197815, "y": -0.9378380505682258, "z": -0.3333333333333333}, {"x": -0.8838856450295977, "y": -0.328077819121472, "z": -0.3333333333333333}, {"x": -0.8605358620137478, "y": 0.3851842663935601, "z": -0.3333333333333333}, {"x": 0.6663097249842437, "y": -0.02181272188118394, "z": -0.7453559924999299}, {"x": -0.3520452337669119, "y": -0.566134787684386, "z": -0.7453559924999299}, {"x": -0.31426449121733185, "y": 0.58794750956557, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 11}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.2551222882433932, "y": -0.6159196883408578, "z": 0.7453559924999299}, {"x": 0.4058409526724803, "y": 0.5289022268608234, "z": 0.7453559924999299}, {"x": -0.6609632409158736, "y": 0.08701746148003428, "z": 0.7453559924999299}, {"x": 0.8186374863379384, "y": -0.4676767632149268, "z": 0.3333333333333333}, {"x": 0.9117867436941041, "y": 0.23986209144546217, "z": 0.3333333333333333}, {"x": -0.00429878546516288, "y": 0.9427992412663543, "z": 0.3333333333333333}, {"x": -0.6636200364436883, "y": 0.6696994371502537, "z": 0.3333333333333333}, {"x": -0.8143387008727755, "y": -0.47512247805142754, "z": 0.3333333333333333}, {"x": -0.24816670725041573, "y": -0.9095615285957159, "z": 0.3333333333333333}, {"x": 0.24816670725041573, "y": 0.9095615285957159, "z": -0.3333333333333333}, {"x": 0.8143387008727755, "y": 0.47512247805142754, "z": -0.3333333333333333}, {"x": 0.6636200364436883, "y": -0.6696994371502537, "z": -0.3333333333333333}, {"x": 0.00429878546516288, "y": -0.9427992412663543, "z": -0.3333333333333333}, {"x": -0.9117867436941041, "y": -0.23986209144546217, "z": -0.3333333333333333}, {"x": -0.8186374863379384, "y": 0.4676767632149268, "z": -0.3333333333333333}, {"x": 0.6609632409158736, "y": -0.08701746148003428, "z": -0.7453559924999299}, {"x": -0.4058409526724803, "y": -0.5289022268608234, "z": -0.7453559924999299}, {"x": -0.2551222882433932, "y": 0.6159196883408578, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 12}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.19352311816964154, "y": -0.6379602238214725, "z": 0.7453559924999299}, {"x": 0.45572820134858094, "y": 0.48657604846522373, "z": 0.7453559924999299}, {"x": -0.6492513195182225, "y": 0.15138417535624876, "z": 0.7453559924999299}, {"x": 0.7688551841559235, "y": -0.5456652771484093, "z": 0.3333333333333333}, {"x": 0.9309068375835012, "y": 0.14933636070687556, "z": 0.3333333333333333}, {"x": 0.08813239989563704, "y": 0.9386807598845969, "z": 0.3333333333333333}, {"x": -0.5947825008726211, "y": 0.7315207895505085, "z": 0.3333333333333333}, {"x": -0.8569875840515603, "y": -0.3930154827361878, "z": 0.3333333333333333}, {"x": -0.3361243367108802, "y": -0.8808571502573842, "z": 0.3333333333333333}, {"x": 0.3361243367108802, "y": 0.8808571502573842, "z": -0.3333333333333333}, {"x": 0.8569875840515603, "y": 0.3930154827361878, "z": -0.3333333333333333}, {"x": 0.5947825008726211, "y": -0.7315207895505085, "z": -0.3333333333333333}, {"x": -0.08813239989563704, "y": -0.9386807598845969, "z": -0.3333333333333333}, {"x": -0.9309068375835012, "y": -0.14933636070687556, "z": -0.3333333333333333}, {"x": -0.7688551841559235, "y": 0.5456652771484093, "z": -0.3333333333333333}, {"x": 0.6492513195182225, "y": -0.15138417535624876, "z": -0.7453559924999299}, {"x": -0.45572820134858094, "y": -0.48657604846522373, "z": -0.7453559924999299}, {"x": -0.19352311816964154, "y": 0.6379602238214725, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 13}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.13006021467741888, "y": -0.6538568536021536, "z": 0.7453559924999299}, {"x": 0.5012265383193183, "y": 0.43956387673337927, "z": 0.7453559924999299}, {"x": -0.6312867529967371, "y": 0.2142929768687743, "z": 0.7453559924999299}, {"x": 0.7116683862514901, "y": -0.6183987361719694, "z": 0.3333333333333333}, {"x": 0.9410617897415274, "y": 0.05737243917912317, "z": 0.3333333333333333}, {"x": 0.17971482206737133, "y": 0.925522269650051, "z": 0.3333333333333333}, {"x": -0.5202168846769619, "y": 0.7862971968574511, "z": 0.3333333333333333}, {"x": -0.8913832083188613, "y": -0.30712353347808174, "z": 0.3333333333333333}, {"x": -0.4208449050645655, "y": -0.8436696360365743, "z": 0.3333333333333333}, {"x": 0.4208449050645655, "y": 0.8436696360365743, "z": -0.3333333333333333}, {"x": 0.8913832083188613, "y": 0.30712353347808174, "z": -0.3333333333333333}, {"x": 0.5202168846769619, "y": -0.7862971968574511, "z": -0.3333333333333333}, {"x": -0.17971482206737133, "y": -0.925522269650051, "z": -0.3333333333333333}, {"x": -0.9410617897415274, "y": -0.05737243917912317, "z": -0.3333333333333333}, {"x": -0.7116683862514901, "y": 0.6183987361719694, "z": -0.3333333333333333}, {"x": 0.6312867529967371, "y": -0.2142929768687743, "z": -0.7453559924999299}, {"x": -0.5012265383193183, "y": -0.43956387673337927, "z": -0.7453559924999299}, {"x": -0.13006021467741888, "y": 0.6538568536021536, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 14}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.06534476021970717, "y": -0.6634564844481312, "z": 0.7453559924999299}, {"x": 0.5418977897277433, "y": 0.38831846457853486, "z": 0.7453559924999299}, {"x": -0.6072425499474505, "y": 0.2751380198695963, "z": 0.7453559924999299}, {"x": 0.6476278327499416, "y": -0.6851766773150575, "z": 0.3333333333333333}, {"x": 0.9421538024276397, "y": -0.03514401030088973, "z": 0.3333333333333333}, {"x": 0.2695664922604818, "y": 0.9034504940168379, "z": 0.3333333333333333}, {"x": -0.4406412955023873, "y": 0.8335011323248857, "z": 0.3333333333333333}, {"x": -0.9171943250104234, "y": -0.21827381670178042, "z": 0.3333333333333333}, {"x": -0.5015125069252524, "y": -0.7983571220239959, "z": 0.3333333333333333}, {"x": 0.5015125069252524, "y": 0.7983571220239959, "z": -0.3333333333333333}, {"x": 0.9171943250104234, "y": 0.21827381670178042, "z": -0.3333333333333333}, {"x": 0.4406412955023873, "y": -0.8335011323248857, "z": -0.3333333333333333}, {"x": -0.2695664922604818, "y": -0.9034504940168379, "z": -0.3333333333333333}, {"x": -0.9421538024276397, "y": 0.03514401030088973, "z": -0.3333333333333333}, {"x": -0.6476278327499416, "y": 0.6851766773150575, "z": -0.3333333333333333}, {"x": 0.6072425499474505, "y": -0.2751380198695963, "z": -0.7453559924999299}, {"x": -0.5418977897277433, "y": -0.38831846457853486, "z": -0.7453559924999299}, {"x": -0.06534476021970717, "y": 0.6634564844481312, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 15}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 4.082155997157844e-17, "y": -0.6666666666666666, "z": 0.7453559924999299}, {"x": 0.5773502691896257, "y": 0.33333333333333337, "z": 0.7453559924999299}, {"x": -0.5773502691896257, "y": 0.3333333333333332, "z": 0.7453559924999299}, {"x": 0.5773502691896258, "y": -0.7453559924999299, "z": 0.3333333333333333}, {"x": 0.9341723589627158, "y": -0.127322003750035, "z": 0.3333333333333333}, {"x": 0.3568220897730898, "y": 0.8726779962499649, "z": 0.3333333333333333}, {"x": -0.35682208977309, "y": 0.8726779962499649, "z": 0.3333333333333333}, {"x": -0.9341723589627157, "y": -0.12732200375003516, "z": 0.3333333333333333}, {"x": -0.5773502691896258, "y": -0.7453559924999299, "z": 0.3333333333333333}, {"x": 0.5773502691896258, "y": 0.7453559924999299, "z": -0.3333333333333333}, {"x": 0.9341723589627157, "y": 0.12732200375003516, "z": -0.3333333333333333}, {"x": 0.35682208977309, "y": -0.8726779962499649, "z": -0.3333333333333333}, {"x": -0.3568220897730898, "y": -0.8726779962499649, "z": -0.3333333333333333}, {"x": -0.9341723589627158, "y": 0.127322003750035, "z": -0.3333333333333333}, {"x": -0.5773502691896258, "y": 0.7453559924999299, "z": -0.3333333333333333}, {"x": 0.5773502691896257, "y": -0.3333333333333332, "z": -0.7453559924999299}, {"x": -0.5773502691896257, "y": -0.33333333333333337, "z": -0.7453559924999299}, {"x": -4.082155997157844e-17, "y": 0.6666666666666666, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 16}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.06534476021970709, "y": -0.6634564844481312, "z": 0.7453559924999299}, {"x": 0.6072425499474505, "y": 0.27513801986959646, "z": 0.7453559924999299}, {"x": -0.5418977897277435, "y": 0.3883184645785347, "z": 0.7453559924999299}, {"x": 0.5015125069252525, "y": -0.798357122023996, "z": 0.3333333333333333}, {"x": 0.9171943250104236, "y": -0.21827381670178028, "z": 0.3333333333333333}, {"x": 0.4406412955023872, "y": 0.8335011323248858, "z": 0.3333333333333333}, {"x": -0.269566492260482, "y": 0.9034504940168377, "z": 0.3333333333333333}, {"x": -0.9421538024276397, "y": -0.035144010300889914, "z": 0.3333333333333333}, {"x": -0.6476278327499417, "y": -0.6851766773150576, "z": 0.3333333333333333}, {"x": 0.6476278327499417, "y": 0.6851766773150576, "z": -0.3333333333333333}, {"x": 0.9421538024276397, "y": 0.035144010300889914, "z": -0.3333333333333333}, {"x": 0.269566492260482, "y": -0.9034504940168377, "z": -0.3333333333333333}, {"x": -0.4406412955023872, "y": -0.8335011323248858, "z": -0.3333333333333333}, {"x": -0.9171943250104236, "y": 0.21827381670178028, "z": -0.3333333333333333}, {"x": -0.5015125069252525, "y": 0.798357122023996, "z": -0.3333333333333333}, {"x": 0.5418977897277435, "y": -0.3883184645785347, "z": -0.7453559924999299}, {"x": -0.6072425499474505, "y": -0.27513801986959646, "z": -0.7453559924999299}, {"x": 0.06534476021970709, "y": 0.6634564844481312, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 17}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.1300602146774188, "y": -0.6538568536021536, "z": 0.7453559924999299}, {"x": 0.6312867529967371, "y": 0.21429297686877444, "z": 0.7453559924999299}, {"x": -0.5012265383193183, "y": 0.43956387673337916, "z": 0.7453559924999299}, {"x": 0.4208449050645656, "y": -0.8436696360365743, "z": 0.3333333333333333}, {"x": 0.8913832083188613, "y": -0.3071235334780816, "z": 0.3333333333333333}, {"x": 0.5202168846769618, "y": 0.7862971968574511, "z": 0.3333333333333333}, {"x": -0.17971482206737152, "y": 0.925522269650051, "z": 0.3333333333333333}, {"x": -0.9410617897415274, "y": 0.05737243917912295, "z": 0.3333333333333333}, {"x": -0.71166838625149, "y": -0.6183987361719694, "z": 0.3333333333333333}, {"x": 0.71166838625149, "y": 0.6183987361719694, "z": -0.3333333333333333}, {"x": 0.9410617897415274, "y": -0.05737243917912295, "z": -0.3333333333333333}, {"x": 0.17971482206737152, "y": -0.925522269650051, "z": -0.3333333333333333}, {"x": -0.5202168846769618, "y": -0.7862971968574511, "z": -0.3333333333333333}, {"x": -0.8913832083188613, "y": 0.3071235334780816, "z": -0.3333333333333333}, {"x": -0.4208449050645656, "y": 0.8436696360365743, "z": -0.3333333333333333}, {"x": 0.5012265383193183, "y": -0.43956387673337916, "z": -0.7453559924999299}, {"x": -0.6312867529967371, "y": -0.21429297686877444, "z": -0.7453559924999299}, {"x": 0.1300602146774188, "y": 0.6538568536021536, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 18}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.19352311816964143, "y": -0.6379602238214725, "z": 0.7453559924999298}, {"x": 0.6492513195182225, "y": 0.15138417535624893, "z": 0.7453559924999298}, {"x": -0.455728201348581, "y": 0.48657604846522357, "z": 0.7453559924999298}, {"x": 0.3361243367108804, "y": -0.8808571502573841, "z": 0.33333333333333326}, {"x": 0.8569875840515605, "y": -0.39301548273618764, "z": 0.33333333333333326}, {"x": 0.5947825008726209, "y": 0.7315207895505086, "z": 0.33333333333333326}, {"x": -0.08813239989563726, "y": 0.9386807598845969, "z": 0.33333333333333326}, {"x": -0.930906837583501, "y": 0.14933636070687534, "z": 0.33333333333333326}, {"x": -0.7688551841559232, "y": -0.5456652771484094, "z": 0.33333333333333326}, {"x": 0.7688551841559232, "y": 0.5456652771484094, "z": -0.33333333333333326}, {"x": 0.930906837583501, "y": -0.14933636070687534, "z": -0.33333333333333326}, {"x": 0.08813239989563726, "y": -0.9386807598845969, "z": -0.33333333333333326}, {"x": -0.5947825008726209, "y": -0.7315207895505086, "z": -0.33333333333333326}, {"x": -0.8569875840515605, "y": 0.39301548273618764, "z": -0.33333333333333326}, {"x": -0.3361243367108804, "y": 0.8808571502573841, "z": -0.33333333333333326}, {"x": 0.455728201348581, "y": -0.48657604846522357, "z": -0.7453559924999298}, {"x": -0.6492513195182225, "y": -0.15138417535624893, "z": -0.7453559924999298}, {"x": 0.19352311816964143, "y": 0.6379602238214725, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 19}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.2551222882433931, "y": -0.6159196883408578, "z": 0.7453559924999298}, {"x": 0.6609632409158734, "y": 0.08701746148003439, "z": 0.7453559924999298}, {"x": -0.4058409526724804, "y": 0.5289022268608233, "z": 0.7453559924999298}, {"x": 0.24816670725041579, "y": -0.9095615285957159, "z": 0.33333333333333326}, {"x": 0.8143387008727756, "y": -0.47512247805142743, "z": 0.33333333333333326}, {"x": 0.6636200364436882, "y": 0.6696994371502538, "z": 0.33333333333333326}, {"x": 0.004298785465162713, "y": 0.9427992412663542, "z": 0.33333333333333326}, {"x": -0.911786743694104, "y": 0.239862091445462, "z": 0.33333333333333326}, {"x": -0.8186374863379383, "y": -0.4676767632149268, "z": 0.33333333333333326}, {"x": 0.8186374863379383, "y": 0.4676767632149268, "z": -0.33333333333333326}, {"x": 0.911786743694104, "y": -0.239862091445462, "z": -0.33333333333333326}, {"x": -0.004298785465162713, "y": -0.9427992412663542, "z": -0.33333333333333326}, {"x": -0.6636200364436882, "y": -0.6696994371502538, "z": -0.33333333333333326}, {"x": -0.8143387008727756, "y": 0.47512247805142743, "z": -0.33333333333333326}, {"x": -0.24816670725041579, "y": 0.9095615285957159, "z": -0.33333333333333326}, {"x": 0.4058409526724804, "y": -0.5289022268608233, "z": -0.7453559924999298}, {"x": -0.6609632409158734, "y": -0.08701746148003439, "z": -0.7453559924999298}, {"x": 0.2551222882433931, "y": 0.6159196883408578, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 20}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.3142644912173318, "y": -0.58794750956557, "z": 0.7453559924999299}, {"x": 0.6663097249842438, "y": 0.02181272188118405, "z": 0.7453559924999299}, {"x": -0.352045233766912, "y": 0.5661347876843859, "z": 0.7453559924999299}, {"x": 0.15781909673740824, "y": -0.9295063321967622, "z": 0.3333333333333333}, {"x": 0.7638472908417697, "y": -0.5526537841746657, "z": 0.3333333333333333}, {"x": 0.7260665482921894, "y": 0.6014285130752903, "z": 0.3333333333333333}, {"x": 0.09668857117197799, "y": 0.9378380505682259, "z": 0.3333333333333333}, {"x": -0.8838856450295977, "y": 0.3280778191214717, "z": 0.3333333333333333}, {"x": -0.8605358620137478, "y": -0.3851842663935602, "z": 0.3333333333333333}, {"x": 0.8605358620137478, "y": 0.3851842663935602, "z": -0.3333333333333333}, {"x": 0.8838856450295977, "y": -0.3280778191214717, "z": -0.3333333333333333}, {"x": -0.09668857117197799, "y": -0.9378380505682259, "z": -0.3333333333333333}, {"x": -0.7260665482921894, "y": -0.6014285130752903, "z": -0.3333333333333333}, {"x": -0.7638472908417697, "y": 0.5526537841746657, "z": -0.3333333333333333}, {"x": -0.15781909673740824, "y": 0.9295063321967622, "z": -0.3333333333333333}, {"x": 0.352045233766912, "y": -0.5661347876843859, "z": -0.7453559924999299}, {"x": -0.6663097249842438, "y": -0.02181272188118405, "z": -0.7453559924999299}, {"x": 0.3142644912173318, "y": 0.58794750956557, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 21}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.3703801553464013, "y": -0.5543130748683636, "z": 0.7453559924999299}, {"x": 0.665239282159069, "y": -0.043602086153428476, "z": 0.7453559924999299}, {"x": -0.29485912681266774, "y": 0.5979151610217921, "z": 0.7453559924999299}, {"x": 0.06595160205012573, "y": -0.9404994816989061, "z": 0.3333333333333333}, {"x": 0.705999613838554, "y": -0.6248627322450122, "z": 0.3333333333333333}, {"x": 0.7815206423722874, "y": 0.5273655036451437, "z": 0.3333333333333333}, {"x": 0.18814719308305716, "y": 0.9238449667686974, "z": 0.3333333333333333}, {"x": -0.8474722444224132, "y": 0.4131339780537623, "z": 0.3333333333333333}, {"x": -0.8941468069216112, "y": -0.2989822345236853, "z": 0.3333333333333333}, {"x": 0.8941468069216112, "y": 0.2989822345236853, "z": -0.3333333333333333}, {"x": 0.8474722444224132, "y": -0.4131339780537623, "z": -0.3333333333333333}, {"x": -0.18814719308305716, "y": -0.9238449667686974, "z": -0.3333333333333333}, {"x": -0.7815206423722874, "y": -0.5273655036451437, "z": -0.3333333333333333}, {"x": -0.705999613838554, "y": 0.6248627322450122, "z": -0.3333333333333333}, {"x": -0.06595160205012573, "y": 0.9404994816989061, "z": -0.3333333333333333}, {"x": 0.29485912681266774, "y": -0.5979151610217921, "z": -0.7453559924999299}, {"x": -0.665239282159069, "y": 0.043602086153428476, "z": -0.7453559924999299}, {"x": 0.3703801553464013, "y": 0.5543130748683636, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 22}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.4229288561090969, "y": -0.5153403022418247, "z": 0.7453559924999298}, {"x": 0.6577622213899194, "y": -0.10859698226305903, "z": 0.7453559924999298}, {"x": -0.2348333652808225, "y": 0.6239372845048836, "z": 0.7453559924999298}, {"x": -0.02655104261771296, "y": -0.9424351070629752, "z": 0.33333333333333326}, {"x": 0.6413527746154257, "y": -0.6910539106191238, "z": 0.33333333333333326}, {"x": 0.8294482654437001, "y": 0.44822367612758474, "z": 0.33333333333333326}, {"x": 0.27779385467302914, "y": 0.900954750914156, "z": 0.33333333333333326}, {"x": -0.8028972228259872, "y": 0.4942114309353903, "z": 0.33333333333333326}, {"x": -0.9191466292884549, "y": -0.2099008402950323, "z": 0.33333333333333326}, {"x": 0.9191466292884549, "y": 0.2099008402950323, "z": -0.33333333333333326}, {"x": 0.8028972228259872, "y": -0.4942114309353903, "z": -0.33333333333333326}, {"x": -0.27779385467302914, "y": -0.900954750914156, "z": -0.33333333333333326}, {"x": -0.8294482654437001, "y": -0.44822367612758474, "z": -0.33333333333333326}, {"x": -0.6413527746154257, "y": 0.6910539106191238, "z": -0.33333333333333326}, {"x": 0.02655104261771296, "y": 0.9424351070629752, "z": -0.33333333333333326}, {"x": 0.2348333652808225, "y": -0.6239372845048836, "z": -0.7453559924999298}, {"x": -0.6577622213899194, "y": 0.10859698226305903, "z": -0.7453559924999298}, {"x": 0.4229288561090969, "y": 0.5153403022418247, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 23}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.4714045207910316, "y": -0.4714045207910317, "z": 0.7453559924999299}, {"x": 0.6439505508593788, "y": -0.17254603006834712, "z": 0.7453559924999299}, {"x": -0.17254603006834726, "y": 0.6439505508593788, "z": 0.7453559924999299}, {"x": -0.11879798623086674, "y": -0.9352945671585929, "z": 0.3333333333333333}, {"x": 0.5705293575736613, "y": -0.7505898620654787, "z": 0.3333333333333333}, {"x": 0.8693878482963455, "y": 0.3647652095849318, "z": 0.3333333333333333}, {"x": 0.36476520958493164, "y": 0.8693878482963455, "z": 0.3333333333333333}, {"x": -0.7505898620654788, "y": 0.570529357573661, "z": 0.3333333333333333}, {"x": -0.9352945671585928, "y": -0.1187979862308669, "z": 0.3333333333333333}, {"x": 0.9352945671585928, "y": 0.1187979862308669, "z": -0.3333333333333333}, {"x": 0.7505898620654788, "y": -0.570529357573661, "z": -0.3333333333333333}, {"x": -0.36476520958493164, "y": -0.8693878482963455, "z": -0.3333333333333333}, {"x": -0.8693878482963455, "y": -0.3647652095849318, "z": -0.3333333333333333}, {"x": -0.5705293575736613, "y": 0.7505898620654787, "z": -0.3333333333333333}, {"x": 0.11879798623086674, "y": 0.9352945671585929, "z": -0.3333333333333333}, {"x": 0.17254603006834726, "y": -0.6439505508593788, "z": -0.7453559924999299}, {"x": -0.6439505508593788, "y": 0.17254603006834712, "z": -0.7453559924999299}, {"x": 0.4714045207910316, "y": 0.4714045207910317, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 24}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.5153403022418246, "y": -0.422928856109097, "z": 0.7453559924999298}, {"x": 0.6239372845048837, "y": -0.23483336528082235, "z": 0.7453559924999298}, {"x": -0.10859698226305914, "y": 0.6577622213899192, "z": 0.7453559924999298}, {"x": -0.2099008402950321, "y": -0.9191466292884549, "z": 0.33333333333333326}, {"x": 0.49421143093539055, "y": -0.8028972228259872, "z": 0.33333333333333326}, {"x": 0.9009547509141558, "y": 0.2777938546730293, "z": 0.33333333333333326}, {"x": 0.4482236761275845, "y": 0.8294482654437003, "z": 0.33333333333333326}, {"x": -0.6910539106191238, "y": 0.6413527746154256, "z": 0.33333333333333326}, {"x": -0.9424351070629752, "y": -0.026551042617713128, "z": 0.33333333333333326}, {"x": 0.9424351070629752, "y": 0.026551042617713128, "z": -0.33333333333333326}, {"x": 0.6910539106191238, "y": -0.6413527746154256, "z": -0.33333333333333326}, {"x": -0.4482236761275845, "y": -0.8294482654437003, "z": -0.33333333333333326}, {"x": -0.9009547509141558, "y": -0.2777938546730293, "z": -0.33333333333333326}, {"x": -0.49421143093539055, "y": 0.8028972228259872, "z": -0.33333333333333326}, {"x": 0.2099008402950321, "y": 0.9191466292884549, "z": -0.33333333333333326}, {"x": 0.10859698226305914, "y": -0.6577622213899192, "z": -0.7453559924999298}, {"x": -0.6239372845048837, "y": 0.23483336528082235, "z": -0.7453559924999298}, {"x": 0.5153403022418246, "y": 0.422928856109097, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 25}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.5543130748683636, "y": -0.37038015534640145, "z": 0.7453559924999299}, {"x": 0.5979151610217922, "y": -0.29485912681266757, "z": 0.7453559924999299}, {"x": -0.0436020861534287, "y": 0.665239282159069, "z": 0.7453559924999299}, {"x": -0.29898223452368516, "y": -0.8941468069216113, "z": 0.3333333333333333}, {"x": 0.41313397805376256, "y": -0.8474722444224132, "z": 0.3333333333333333}, {"x": 0.9238449667686974, "y": 0.18814719308305744, "z": 0.3333333333333333}, {"x": 0.5273655036451435, "y": 0.7815206423722876, "z": 0.3333333333333333}, {"x": -0.6248627322450123, "y": 0.7059996138385537, "z": 0.3333333333333333}, {"x": -0.9404994816989061, "y": 0.06595160205012551, "z": 0.3333333333333333}, {"x": 0.9404994816989061, "y": -0.06595160205012551, "z": -0.3333333333333333}, {"x": 0.6248627322450123, "y": -0.7059996138385537, "z": -0.3333333333333333}, {"x": -0.5273655036451435, "y": -0.7815206423722876, "z": -0.3333333333333333}, {"x": -0.9238449667686974, "y": -0.18814719308305744, "z": -0.3333333333333333}, {"x": -0.41313397805376256, "y": 0.8474722444224132, "z": -0.3333333333333333}, {"x": 0.29898223452368516, "y": 0.8941468069216113, "z": -0.3333333333333333}, {"x": 0.0436020861534287, "y": -0.665239282159069, "z": -0.7453559924999299}, {"x": -0.5979151610217922, "y": 0.29485912681266757, "z": -0.7453559924999299}, {"x": 0.5543130748683636, "y": 0.37038015534640145, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 26}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.58794750956557, "y": -0.3142644912173319, "z": 0.7453559924999299}, {"x": 0.5661347876843861, "y": -0.3520452337669118, "z": 0.7453559924999299}, {"x": 0.021812721881183883, "y": 0.6663097249842437, "z": 0.7453559924999299}, {"x": -0.38518426639356007, "y": -0.8605358620137478, "z": 0.3333333333333333}, {"x": 0.32807781912147205, "y": -0.8838856450295977, "z": 0.3333333333333333}, {"x": 0.9378380505682258, "y": 0.09668857117197821, "z": 0.3333333333333333}, {"x": 0.6014285130752901, "y": 0.7260665482921895, "z": 0.3333333333333333}, {"x": -0.5526537841746658, "y": 0.7638472908417695, "z": 0.3333333333333333}, {"x": -0.9295063321967623, "y": 0.15781909673740802, "z": 0.3333333333333333}, {"x": 0.9295063321967623, "y": -0.15781909673740802, "z": -0.3333333333333333}, {"x": 0.5526537841746658, "y": -0.7638472908417695, "z": -0.3333333333333333}, {"x": -0.6014285130752901, "y": -0.7260665482921895, "z": -0.3333333333333333}, {"x": -0.9378380505682258, "y": -0.09668857117197821, "z": -0.3333333333333333}, {"x": -0.32807781912147205, "y": 0.8838856450295977, "z": -0.3333333333333333}, {"x": 0.38518426639356007, "y": 0.8605358620137478, "z": -0.3333333333333333}, {"x": -0.021812721881183883, "y": -0.6663097249842437, "z": -0.7453559924999299}, {"x": -0.5661347876843861, "y": 0.3520452337669118, "z": -0.7453559924999299}, {"x": 0.58794750956557, "y": 0.3142644912173319, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 27}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6159196883408578, "y": -0.2551222882433932, "z": 0.7453559924999299}, {"x": 0.5289022268608234, "y": -0.4058409526724803, "z": 0.7453559924999299}, {"x": 0.08701746148003425, "y": 0.6609632409158736, "z": 0.7453559924999299}, {"x": -0.46767676321492674, "y": -0.8186374863379384, "z": 0.3333333333333333}, {"x": 0.23986209144546222, "y": -0.9117867436941041, "z": 0.3333333333333333}, {"x": 0.9427992412663543, "y": 0.004298785465162935, "z": 0.3333333333333333}, {"x": 0.6696994371502537, "y": 0.6636200364436884, "z": 0.3333333333333333}, {"x": -0.4751224780514276, "y": 0.8143387008727755, "z": 0.3333333333333333}, {"x": -0.9095615285957159, "y": 0.24816670725041567, "z": 0.3333333333333333}, {"x": 0.9095615285957159, "y": -0.24816670725041567, "z": -0.3333333333333333}, {"x": 0.4751224780514276, "y": -0.8143387008727755, "z": -0.3333333333333333}, {"x": -0.6696994371502537, "y": -0.6636200364436884, "z": -0.3333333333333333}, {"x": -0.9427992412663543, "y": -0.004298785465162935, "z": -0.3333333333333333}, {"x": -0.23986209144546222, "y": 0.9117867436941041, "z": -0.3333333333333333}, {"x": 0.46767676321492674, "y": 0.8186374863379384, "z": -0.3333333333333333}, {"x": -0.08701746148003425, "y": -0.6609632409158736, "z": -0.7453559924999299}, {"x": -0.5289022268608234, "y": 0.4058409526724803, "z": -0.7453559924999299}, {"x": 0.6159196883408578, "y": 0.2551222882433932, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 28}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6379602238214725, "y": -0.19352311816964157, "z": 0.7453559924999299}, {"x": 0.48657604846522373, "y": -0.45572820134858083, "z": 0.7453559924999299}, {"x": 0.15138417535624873, "y": 0.6492513195182223, "z": 0.7453559924999299}, {"x": -0.5456652771484092, "y": -0.7688551841559234, "z": 0.3333333333333333}, {"x": 0.14933636070687561, "y": -0.9309068375835011, "z": 0.3333333333333333}, {"x": 0.938680759884597, "y": -0.08813239989563698, "z": 0.3333333333333333}, {"x": 0.7315207895505085, "y": 0.5947825008726211, "z": 0.3333333333333333}, {"x": -0.39301548273618786, "y": 0.8569875840515602, "z": 0.3333333333333333}, {"x": -0.8808571502573841, "y": 0.33612433671088005, "z": 0.3333333333333333}, {"x": 0.8808571502573841, "y": -0.33612433671088005, "z": -0.3333333333333333}, {"x": 0.39301548273618786, "y": -0.8569875840515602, "z": -0.3333333333333333}, {"x": -0.7315207895505085, "y": -0.5947825008726211, "z": -0.3333333333333333}, {"x": -0.938680759884597, "y": 0.08813239989563698, "z": -0.3333333333333333}, {"x": -0.14933636070687561, "y": 0.9309068375835011, "z": -0.3333333333333333}, {"x": 0.5456652771484092, "y": 0.7688551841559234, "z": -0.3333333333333333}, {"x": -0.15138417535624873, "y": -0.6492513195182223, "z": -0.7453559924999299}, {"x": -0.48657604846522373, "y": 0.45572820134858083, "z": -0.7453559924999299}, {"x": 0.6379602238214725, "y": 0.19352311816964157, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 29}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6538568536021536, "y": -0.13006021467741907, "z": 0.7453559924999299}, {"x": 0.43956387673337943, "y": -0.5012265383193182, "z": 0.7453559924999299}, {"x": 0.21429297686877413, "y": 0.6312867529967372, "z": 0.7453559924999299}, {"x": -0.6183987361719692, "y": -0.7116683862514903, "z": 0.3333333333333333}, {"x": 0.05737243917912342, "y": -0.9410617897415274, "z": 0.3333333333333333}, {"x": 0.9255222696500511, "y": -0.1797148220673711, "z": 0.3333333333333333}, {"x": 0.786297196857451, "y": 0.5202168846769621, "z": 0.3333333333333333}, {"x": -0.307123533478082, "y": 0.8913832083188613, "z": 0.3333333333333333}, {"x": -0.8436696360365745, "y": 0.42084490506456534, "z": 0.3333333333333333}, {"x": 0.8436696360365745, "y": -0.42084490506456534, "z": -0.3333333333333333}, {"x": 0.307123533478082, "y": -0.8913832083188613, "z": -0.3333333333333333}, {"x": -0.786297196857451, "y": -0.5202168846769621, "z": -0.3333333333333333}, {"x": -0.9255222696500511, "y": 0.1797148220673711, "z": -0.3333333333333333}, {"x": -0.05737243917912342, "y": 0.9410617897415274, "z": -0.3333333333333333}, {"x": 0.6183987361719692, "y": 0.7116683862514903, "z": -0.3333333333333333}, {"x": -0.21429297686877413, "y": -0.6312867529967372, "z": -0.7453559924999299}, {"x": -0.43956387673337943, "y": 0.5012265383193182, "z": -0.7453559924999299}, {"x": 0.6538568536021536, "y": 0.13006021467741907, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 30}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.6634564844481312, "y": -0.06534476021970721, "z": 0.7453559924999298}, {"x": 0.38831846457853486, "y": -0.5418977897277433, "z": 0.7453559924999298}, {"x": 0.2751380198695963, "y": 0.6072425499474505, "z": 0.7453559924999298}, {"x": -0.6851766773150574, "y": -0.6476278327499417, "z": 0.33333333333333326}, {"x": -0.03514401030088968, "y": -0.9421538024276397, "z": 0.33333333333333326}, {"x": 0.9034504940168379, "y": -0.2695664922604818, "z": 0.33333333333333326}, {"x": 0.8335011323248857, "y": 0.44064129550238734, "z": 0.33333333333333326}, {"x": -0.21827381670178048, "y": 0.9171943250104234, "z": 0.33333333333333326}, {"x": -0.798357122023996, "y": 0.5015125069252523, "z": 0.33333333333333326}, {"x": 0.798357122023996, "y": -0.5015125069252523, "z": -0.33333333333333326}, {"x": 0.21827381670178048, "y": -0.9171943250104234, "z": -0.33333333333333326}, {"x": -0.8335011323248857, "y": -0.44064129550238734, "z": -0.33333333333333326}, {"x": -0.9034504940168379, "y": 0.2695664922604818, "z": -0.33333333333333326}, {"x": 0.03514401030088968, "y": 0.9421538024276397, "z": -0.33333333333333326}, {"x": 0.6851766773150574, "y": 0.6476278327499417, "z": -0.33333333333333326}, {"x": -0.2751380198695963, "y": -0.6072425499474505, "z": -0.7453559924999298}, {"x": -0.38831846457853486, "y": 0.5418977897277433, "z": -0.7453559924999298}, {"x": 0.6634564844481312, "y": 0.06534476021970721, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 31}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6666666666666666, "y": -8.164311994315688e-17, "z": 0.7453559924999299}, {"x": 0.33333333333333337, "y": -0.5773502691896257, "z": 0.7453559924999299}, {"x": 0.3333333333333332, "y": 0.5773502691896257, "z": 0.7453559924999299}, {"x": -0.7453559924999298, "y": -0.577350269189626, "z": 0.3333333333333333}, {"x": -0.12732200375003494, "y": -0.9341723589627158, "z": 0.3333333333333333}, {"x": 0.8726779962499649, "y": -0.35682208977308977, "z": 0.3333333333333333}, {"x": 0.8726779962499649, "y": 0.35682208977309005, "z": 0.3333333333333333}, {"x": -0.12732200375003522, "y": 0.9341723589627157, "z": 0.3333333333333333}, {"x": -0.74535599249993, "y": 0.5773502691896257, "z": 0.3333333333333333}, {"x": 0.74535599249993, "y": -0.5773502691896257, "z": -0.3333333333333333}, {"x": 0.12732200375003522, "y": -0.9341723589627157, "z": -0.3333333333333333}, {"x": -0.8726779962499649, "y": -0.35682208977309005, "z": -0.3333333333333333}, {"x": -0.8726779962499649, "y": 0.35682208977308977, "z": -0.3333333333333333}, {"x": 0.12732200375003494, "y": 0.9341723589627158, "z": -0.3333333333333333}, {"x": 0.7453559924999298, "y": 0.577350269189626, "z": -0.3333333333333333}, {"x": -0.3333333333333332, "y": -0.5773502691896257, "z": -0.7453559924999299}, {"x": -0.33333333333333337, "y": 0.5773502691896257, "z": -0.7453559924999299}, {"x": 0.6666666666666666, "y": 8.164311994315688e-17, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 32}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6634564844481312, "y": 0.06534476021970706, "z": 0.7453559924999299}, {"x": 0.27513801986959646, "y": -0.6072425499474505, "z": 0.7453559924999299}, {"x": 0.3883184645785347, "y": 0.5418977897277435, "z": 0.7453559924999299}, {"x": -0.7983571220239959, "y": -0.5015125069252526, "z": 0.3333333333333333}, {"x": -0.21827381670178023, "y": -0.9171943250104236, "z": 0.3333333333333333}, {"x": 0.8335011323248858, "y": -0.44064129550238706, "z": 0.3333333333333333}, {"x": 0.9034504940168377, "y": 0.269566492260482, "z": 0.3333333333333333}, {"x": -0.03514401030088997, "y": 0.9421538024276397, "z": 0.3333333333333333}, {"x": -0.6851766773150577, "y": 0.6476278327499416, "z": 0.3333333333333333}, {"x": 0.6851766773150577, "y": -0.6476278327499416, "z": -0.3333333333333333}, {"x": 0.03514401030088997, "y": -0.9421538024276397, "z": -0.3333333333333333}, {"x": -0.9034504940168377, "y": -0.269566492260482, "z": -0.3333333333333333}, {"x": -0.8335011323248858, "y": 0.44064129550238706, "z": -0.3333333333333333}, {"x": 0.21827381670178023, "y": 0.9171943250104236, "z": -0.3333333333333333}, {"x": 0.7983571220239959, "y": 0.5015125069252526, "z": -0.3333333333333333}, {"x": -0.3883184645785347, "y": -0.5418977897277435, "z": -0.7453559924999299}, {"x": -0.27513801986959646, "y": 0.6072425499474505, "z": -0.7453559924999299}, {"x": 0.6634564844481312, "y": -0.06534476021970706, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 33}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6538568536021536, "y": 0.1300602146774189, "z": 0.7453559924999299}, {"x": 0.21429297686877435, "y": -0.6312867529967372, "z": 0.7453559924999299}, {"x": 0.4395638767333792, "y": 0.5012265383193183, "z": 0.7453559924999299}, {"x": -0.8436696360365743, "y": -0.4208449050645655, "z": 0.3333333333333333}, {"x": -0.30712353347808174, "y": -0.8913832083188613, "z": 0.3333333333333333}, {"x": 0.7862971968574511, "y": -0.5202168846769619, "z": 0.3333333333333333}, {"x": 0.925522269650051, "y": 0.17971482206737138, "z": 0.3333333333333333}, {"x": 0.057372439179123116, "y": 0.9410617897415274, "z": 0.3333333333333333}, {"x": -0.6183987361719694, "y": 0.7116683862514901, "z": 0.3333333333333333}, {"x": 0.6183987361719694, "y": -0.7116683862514901, "z": -0.3333333333333333}, {"x": -0.057372439179123116, "y": -0.9410617897415274, "z": -0.3333333333333333}, {"x": -0.925522269650051, "y": -0.17971482206737138, "z": -0.3333333333333333}, {"x": -0.7862971968574511, "y": 0.5202168846769619, "z": -0.3333333333333333}, {"x": 0.30712353347808174, "y": 0.8913832083188613, "z": -0.3333333333333333}, {"x": 0.8436696360365743, "y": 0.4208449050645655, "z": -0.3333333333333333}, {"x": -0.4395638767333792, "y": -0.5012265383193183, "z": -0.7453559924999299}, {"x": -0.21429297686877435, "y": 0.6312867529967372, "z": -0.7453559924999299}, {"x": 0.6538568536021536, "y": -0.1300602146774189, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 34}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6379602238214725, "y": 0.1935231181696414, "z": 0.7453559924999299}, {"x": 0.15138417535624896, "y": -0.6492513195182223, "z": 0.7453559924999299}, {"x": 0.4865760484652235, "y": 0.45572820134858105, "z": 0.7453559924999299}, {"x": -0.8808571502573841, "y": -0.3361243367108804, "z": 0.3333333333333333}, {"x": -0.3930154827361876, "y": -0.8569875840515605, "z": 0.3333333333333333}, {"x": 0.7315207895505086, "y": -0.5947825008726207, "z": 0.3333333333333333}, {"x": 0.9386807598845969, "y": 0.08813239989563731, "z": 0.3333333333333333}, {"x": 0.14933636070687528, "y": 0.930906837583501, "z": 0.3333333333333333}, {"x": -0.5456652771484094, "y": 0.7688551841559232, "z": 0.3333333333333333}, {"x": 0.5456652771484094, "y": -0.7688551841559232, "z": -0.3333333333333333}, {"x": -0.14933636070687528, "y": -0.930906837583501, "z": -0.3333333333333333}, {"x": -0.9386807598845969, "y": -0.08813239989563731, "z": -0.3333333333333333}, {"x": -0.7315207895505086, "y": 0.5947825008726207, "z": -0.3333333333333333}, {"x": 0.3930154827361876, "y": 0.8569875840515605, "z": -0.3333333333333333}, {"x": 0.8808571502573841, "y": 0.3361243367108804, "z": -0.3333333333333333}, {"x": -0.4865760484652235, "y": -0.45572820134858105, "z": -0.7453559924999299}, {"x": -0.15138417535624896, "y": 0.6492513195182223, "z": -0.7453559924999299}, {"x": 0.6379602238214725, "y": -0.1935231181696414, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 35}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.6159196883408579, "y": 0.2551222882433931, "z": 0.7453559924999299}, {"x": 0.08701746148003447, "y": -0.6609632409158737, "z": 0.7453559924999299}, {"x": 0.5289022268608233, "y": 0.40584095267248055, "z": 0.7453559924999299}, {"x": -0.9095615285957159, "y": -0.24816670725041595, "z": 0.3333333333333333}, {"x": -0.4751224780514274, "y": -0.8143387008727757, "z": 0.3333333333333333}, {"x": 0.6696994371502539, "y": -0.6636200364436882, "z": 0.3333333333333333}, {"x": 0.9427992412663543, "y": -0.004298785465162658, "z": 0.3333333333333333}, {"x": 0.23986209144546194, "y": 0.9117867436941041, "z": 0.3333333333333333}, {"x": -0.467676763214927, "y": 0.8186374863379384, "z": 0.3333333333333333}, {"x": 0.467676763214927, "y": -0.8186374863379384, "z": -0.3333333333333333}, {"x": -0.23986209144546194, "y": -0.9117867436941041, "z": -0.3333333333333333}, {"x": -0.9427992412663543, "y": 0.004298785465162658, "z": -0.3333333333333333}, {"x": -0.6696994371502539, "y": 0.6636200364436882, "z": -0.3333333333333333}, {"x": 0.4751224780514274, "y": 0.8143387008727757, "z": -0.3333333333333333}, {"x": 0.9095615285957159, "y": 0.24816670725041595, "z": -0.3333333333333333}, {"x": -0.5289022268608233, "y": -0.40584095267248055, "z": -0.7453559924999299}, {"x": -0.08701746148003447, "y": 0.6609632409158737, "z": -0.7453559924999299}, {"x": 0.6159196883408579, "y": -0.2551222882433931, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 36}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.58794750956557, "y": 0.31426449121733174, "z": 0.7453559924999298}, {"x": 0.021812721881184105, "y": -0.6663097249842438, "z": 0.7453559924999298}, {"x": 0.5661347876843859, "y": 0.35204523376691205, "z": 0.7453559924999298}, {"x": -0.929506332196762, "y": -0.1578190967374083, "z": 0.33333333333333326}, {"x": -0.5526537841746656, "y": -0.7638472908417697, "z": 0.33333333333333326}, {"x": 0.6014285130752903, "y": -0.7260665482921893, "z": 0.33333333333333326}, {"x": 0.9378380505682258, "y": -0.09668857117197793, "z": 0.33333333333333326}, {"x": 0.3280778191214717, "y": 0.8838856450295977, "z": 0.33333333333333326}, {"x": -0.38518426639356024, "y": 0.8605358620137478, "z": 0.33333333333333326}, {"x": 0.38518426639356024, "y": -0.8605358620137478, "z": -0.33333333333333326}, {"x": -0.3280778191214717, "y": -0.8838856450295977, "z": -0.33333333333333326}, {"x": -0.9378380505682258, "y": 0.09668857117197793, "z": -0.33333333333333326}, {"x": -0.6014285130752903, "y": 0.7260665482921893, "z": -0.33333333333333326}, {"x": 0.5526537841746656, "y": 0.7638472908417697, "z": -0.33333333333333326}, {"x": 0.929506332196762, "y": 0.1578190967374083, "z": -0.33333333333333326}, {"x": -0.5661347876843859, "y": -0.35204523376691205, "z": -0.7453559924999298}, {"x": -0.021812721881184105, "y": 0.6663097249842438, "z": -0.7453559924999298}, {"x": 0.58794750956557, "y": -0.31426449121733174, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 37}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 0.9999999999999999}, {"x": -0.5543130748683636, "y": 0.3703801553464013, "z": 0.7453559924999298}, {"x": -0.043602086153428476, "y": -0.665239282159069, "z": 0.7453559924999298}, {"x": 0.5979151610217921, "y": 0.29485912681266774, "z": 0.7453559924999298}, {"x": -0.9404994816989061, "y": -0.06595160205012573, "z": 0.33333333333333326}, {"x": -0.6248627322450122, "y": -0.705999613838554, "z": 0.33333333333333326}, {"x": 0.5273655036451437, "y": -0.7815206423722874, "z": 0.33333333333333326}, {"x": 0.9238449667686974, "y": -0.18814719308305716, "z": 0.33333333333333326}, {"x": 0.4131339780537623, "y": 0.8474722444224132, "z": 0.33333333333333326}, {"x": -0.2989822345236853, "y": 0.8941468069216112, "z": 0.33333333333333326}, {"x": 0.2989822345236853, "y": -0.8941468069216112, "z": -0.33333333333333326}, {"x": -0.4131339780537623, "y": -0.8474722444224132, "z": -0.33333333333333326}, {"x": -0.9238449667686974, "y": 0.18814719308305716, "z": -0.33333333333333326}, {"x": -0.5273655036451437, "y": 0.7815206423722874, "z": -0.33333333333333326}, {"x": 0.6248627322450122, "y": 0.705999613838554, "z": -0.33333333333333326}, {"x": 0.9404994816989061, "y": 0.06595160205012573, "z": -0.33333333333333326}, {"x": -0.5979151610217921, "y": -0.29485912681266774, "z": -0.7453559924999298}, {"x": 0.043602086153428476, "y": 0.665239282159069, "z": -0.7453559924999298}, {"x": 0.5543130748683636, "y": -0.3703801553464013, "z": -0.7453559924999298}, {"x": 0.0, "y": 0.0, "z": -0.9999999999999999}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 38}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.5153403022418247, "y": 0.4229288561090968, "z": 0.7453559924999299}, {"x": -0.10859698226305897, "y": -0.6577622213899192, "z": 0.7453559924999299}, {"x": 0.6239372845048836, "y": 0.23483336528082252, "z": 0.7453559924999299}, {"x": -0.9424351070629751, "y": 0.02655104261771285, "z": 0.3333333333333333}, {"x": -0.6910539106191237, "y": -0.6413527746154257, "z": 0.3333333333333333}, {"x": 0.44822367612758474, "y": -0.8294482654437001, "z": 0.3333333333333333}, {"x": 0.9009547509141559, "y": -0.27779385467302903, "z": 0.3333333333333333}, {"x": 0.49421143093539016, "y": 0.8028972228259872, "z": 0.3333333333333333}, {"x": -0.20990084029503236, "y": 0.9191466292884549, "z": 0.3333333333333333}, {"x": 0.20990084029503236, "y": -0.9191466292884549, "z": -0.3333333333333333}, {"x": -0.49421143093539016, "y": -0.8028972228259872, "z": -0.3333333333333333}, {"x": -0.9009547509141559, "y": 0.27779385467302903, "z": -0.3333333333333333}, {"x": -0.44822367612758474, "y": 0.8294482654437001, "z": -0.3333333333333333}, {"x": 0.6910539106191237, "y": 0.6413527746154257, "z": -0.3333333333333333}, {"x": 0.9424351070629751, "y": -0.02655104261771285, "z": -0.3333333333333333}, {"x": -0.6239372845048836, "y": -0.23483336528082252, "z": -0.7453559924999299}, {"x": 0.10859698226305897, "y": 0.6577622213899192, "z": -0.7453559924999299}, {"x": 0.5153403022418247, "y": -0.4229288561090968, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 39}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.4714045207910318, "y": 0.4714045207910316, "z": 0.7453559924999299}, {"x": -0.17254603006834707, "y": -0.6439505508593789, "z": 0.7453559924999299}, {"x": 0.6439505508593788, "y": 0.17254603006834732, "z": 0.7453559924999299}, {"x": -0.935294567158593, "y": 0.11879798623086663, "z": 0.3333333333333333}, {"x": -0.7505898620654788, "y": -0.5705293575736614, "z": 0.3333333333333333}, {"x": 0.3647652095849319, "y": -0.8693878482963455, "z": 0.3333333333333333}, {"x": 0.8693878482963457, "y": -0.3647652095849316, "z": 0.3333333333333333}, {"x": 0.570529357573661, "y": 0.750589862065479, "z": 0.3333333333333333}, {"x": -0.11879798623086701, "y": 0.935294567158593, "z": 0.3333333333333333}, {"x": 0.11879798623086701, "y": -0.935294567158593, "z": -0.3333333333333333}, {"x": -0.570529357573661, "y": -0.750589862065479, "z": -0.3333333333333333}, {"x": -0.8693878482963457, "y": 0.3647652095849316, "z": -0.3333333333333333}, {"x": -0.3647652095849319, "y": 0.8693878482963455, "z": -0.3333333333333333}, {"x": 0.7505898620654788, "y": 0.5705293575736614, "z": -0.3333333333333333}, {"x": 0.935294567158593, "y": -0.11879798623086663, "z": -0.3333333333333333}, {"x": -0.6439505508593788, "y": -0.17254603006834732, "z": -0.7453559924999299}, {"x": 0.17254603006834707, "y": 0.6439505508593789, "z": -0.7453559924999299}, {"x": 0.4714045207910318, "y": -0.4714045207910316, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 40}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.42292885610909725, "y": 0.5153403022418244, "z": 0.7453559924999299}, {"x": -0.234833365280822, "y": -0.6239372845048838, "z": 0.7453559924999299}, {"x": 0.6577622213899192, "y": 0.10859698226305953, "z": 0.7453559924999299}, {"x": -0.9191466292884551, "y": 0.20990084029503164, "z": 0.3333333333333333}, {"x": -0.8028972228259869, "y": -0.4942114309353909, "z": 0.3333333333333333}, {"x": 0.27779385467302975, "y": -0.9009547509141558, "z": 0.3333333333333333}, {"x": 0.8294482654437005, "y": -0.4482236761275842, "z": 0.3333333333333333}, {"x": 0.6413527746154252, "y": 0.6910539106191242, "z": 0.3333333333333333}, {"x": -0.026551042617713627, "y": 0.9424351070629752, "z": 0.3333333333333333}, {"x": 0.026551042617713627, "y": -0.9424351070629752, "z": -0.3333333333333333}, {"x": -0.6413527746154252, "y": -0.6910539106191242, "z": -0.3333333333333333}, {"x": -0.8294482654437005, "y": 0.4482236761275842, "z": -0.3333333333333333}, {"x": -0.27779385467302975, "y": 0.9009547509141558, "z": -0.3333333333333333}, {"x": 0.8028972228259869, "y": 0.4942114309353909, "z": -0.3333333333333333}, {"x": 0.9191466292884551, "y": -0.20990084029503164, "z": -0.3333333333333333}, {"x": -0.6577622213899192, "y": -0.10859698226305953, "z": -0.7453559924999299}, {"x": 0.234833365280822, "y": 0.6239372845048838, "z": -0.7453559924999299}, {"x": 0.42292885610909725, "y": -0.5153403022418244, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 41}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.37038015534640145, "y": 0.5543130748683635, "z": 0.7453559924999299}, {"x": -0.2948591268126675, "y": -0.5979151610217921, "z": 0.7453559924999299}, {"x": 0.6652392821590689, "y": 0.043602086153428754, "z": 0.7453559924999299}, {"x": -0.8941468069216112, "y": 0.29898223452368505, "z": 0.3333333333333333}, {"x": -0.847472244422413, "y": -0.41313397805376256, "z": 0.3333333333333333}, {"x": 0.1881471930830575, "y": -0.9238449667686973, "z": 0.3333333333333333}, {"x": 0.7815206423722876, "y": -0.5273655036451433, "z": 0.3333333333333333}, {"x": 0.7059996138385536, "y": 0.6248627322450123, "z": 0.3333333333333333}, {"x": 0.06595160205012546, "y": 0.9404994816989061, "z": 0.3333333333333333}, {"x": -0.06595160205012546, "y": -0.9404994816989061, "z": -0.3333333333333333}, {"x": -0.7059996138385536, "y": -0.6248627322450123, "z": -0.3333333333333333}, {"x": -0.7815206423722876, "y": 0.5273655036451433, "z": -0.3333333333333333}, {"x": -0.1881471930830575, "y": 0.9238449667686973, "z": -0.3333333333333333}, {"x": 0.847472244422413, "y": 0.41313397805376256, "z": -0.3333333333333333}, {"x": 0.8941468069216112, "y": -0.29898223452368505, "z": -0.3333333333333333}, {"x": -0.6652392821590689, "y": -0.043602086153428754, "z": -0.7453559924999299}, {"x": 0.2948591268126675, "y": 0.5979151610217921, "z": -0.7453559924999299}, {"x": 0.37038015534640145, "y": -0.5543130748683635, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 42}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.3142644912173319, "y": 0.58794750956557, "z": 0.7453559924999299}, {"x": -0.3520452337669118, "y": -0.5661347876843861, "z": 0.7453559924999299}, {"x": 0.6663097249842437, "y": -0.021812721881183883, "z": 0.7453559924999299}, {"x": -0.8605358620137478, "y": 0.38518426639356007, "z": 0.3333333333333333}, {"x": -0.8838856450295977, "y": -0.32807781912147205, "z": 0.3333333333333333}, {"x": 0.09668857117197821, "y": -0.9378380505682258, "z": 0.3333333333333333}, {"x": 0.7260665482921895, "y": -0.6014285130752901, "z": 0.3333333333333333}, {"x": 0.7638472908417695, "y": 0.5526537841746658, "z": 0.3333333333333333}, {"x": 0.15781909673740802, "y": 0.9295063321967623, "z": 0.3333333333333333}, {"x": -0.15781909673740802, "y": -0.9295063321967623, "z": -0.3333333333333333}, {"x": -0.7638472908417695, "y": -0.5526537841746658, "z": -0.3333333333333333}, {"x": -0.7260665482921895, "y": 0.6014285130752901, "z": -0.3333333333333333}, {"x": -0.09668857117197821, "y": 0.9378380505682258, "z": -0.3333333333333333}, {"x": 0.8838856450295977, "y": 0.32807781912147205, "z": -0.3333333333333333}, {"x": 0.8605358620137478, "y": -0.38518426639356007, "z": -0.3333333333333333}, {"x": -0.6663097249842437, "y": 0.021812721881183883, "z": -0.7453559924999299}, {"x": 0.3520452337669118, "y": 0.5661347876843861, "z": -0.7453559924999299}, {"x": 0.3142644912173319, "y": -0.58794750956557, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 43}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.25512228824339356, "y": 0.6159196883408576, "z": 0.7453559924999299}, {"x": -0.40584095267248005, "y": -0.5289022268608237, "z": 0.7453559924999299}, {"x": 0.6609632409158736, "y": -0.08701746148003392, "z": 0.7453559924999299}, {"x": -0.8186374863379386, "y": 0.46767676321492635, "z": 0.3333333333333333}, {"x": -0.911786743694104, "y": -0.23986209144546272, "z": 0.3333333333333333}, {"x": 0.004298785465163435, "y": -0.9427992412663542, "z": 0.3333333333333333}, {"x": 0.6636200364436886, "y": -0.6696994371502534, "z": 0.3333333333333333}, {"x": 0.8143387008727752, "y": 0.475122478051428, "z": 0.3333333333333333}, {"x": 0.24816670725041523, "y": 0.9095615285957162, "z": 0.3333333333333333}, {"x": -0.24816670725041523, "y": -0.9095615285957162, "z": -0.3333333333333333}, {"x": -0.8143387008727752, "y": -0.475122478051428, "z": -0.3333333333333333}, {"x": -0.6636200364436886, "y": 0.6696994371502534, "z": -0.3333333333333333}, {"x": -0.004298785465163435, "y": 0.9427992412663542, "z": -0.3333333333333333}, {"x": 0.911786743694104, "y": 0.23986209144546272, "z": -0.3333333333333333}, {"x": 0.8186374863379386, "y": -0.46767676321492635, "z": -0.3333333333333333}, {"x": -0.6609632409158736, "y": 0.08701746148003392, "z": -0.7453559924999299}, {"x": 0.40584095267248005, "y": 0.5289022268608237, "z": -0.7453559924999299}, {"x": 0.25512228824339356, "y": -0.6159196883408576, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 44}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.19352311816964163, "y": 0.6379602238214725, "z": 0.7453559924999299}, {"x": -0.4557282013485808, "y": -0.4865760484652238, "z": 0.7453559924999299}, {"x": 0.6492513195182223, "y": -0.1513841753562487, "z": 0.7453559924999299}, {"x": -0.7688551841559234, "y": 0.5456652771484091, "z": 0.3333333333333333}, {"x": -0.9309068375835011, "y": -0.14933636070687567, "z": 0.3333333333333333}, {"x": -0.08813239989563698, "y": -0.938680759884597, "z": 0.3333333333333333}, {"x": 0.5947825008726211, "y": -0.7315207895505085, "z": 0.3333333333333333}, {"x": 0.8569875840515602, "y": 0.3930154827361879, "z": 0.3333333333333333}, {"x": 0.33612433671088005, "y": 0.8808571502573842, "z": 0.3333333333333333}, {"x": -0.33612433671088005, "y": -0.8808571502573842, "z": -0.3333333333333333}, {"x": -0.8569875840515602, "y": -0.3930154827361879, "z": -0.3333333333333333}, {"x": -0.5947825008726211, "y": 0.7315207895505085, "z": -0.3333333333333333}, {"x": 0.08813239989563698, "y": 0.938680759884597, "z": -0.3333333333333333}, {"x": 0.9309068375835011, "y": 0.14933636070687567, "z": -0.3333333333333333}, {"x": 0.7688551841559234, "y": -0.5456652771484091, "z": -0.3333333333333333}, {"x": -0.6492513195182223, "y": 0.1513841753562487, "z": -0.7453559924999299}, {"x": 0.4557282013485808, "y": 0.4865760484652238, "z": -0.7453559924999299}, {"x": 0.19352311816964163, "y": -0.6379602238214725, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 45}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.1300602146774191, "y": 0.6538568536021535, "z": 0.7453559924999299}, {"x": -0.5012265383193181, "y": -0.4395638767333794, "z": 0.7453559924999299}, {"x": 0.6312867529967371, "y": -0.21429297686877405, "z": 0.7453559924999299}, {"x": -0.7116683862514902, "y": 0.618398736171969, "z": 0.3333333333333333}, {"x": -0.9410617897415274, "y": -0.05737243917912349, "z": 0.3333333333333333}, {"x": -0.179714822067371, "y": -0.925522269650051, "z": 0.3333333333333333}, {"x": 0.5202168846769621, "y": -0.7862971968574509, "z": 0.3333333333333333}, {"x": 0.8913832083188612, "y": 0.3071235334780821, "z": 0.3333333333333333}, {"x": 0.4208449050645652, "y": 0.8436696360365744, "z": 0.3333333333333333}, {"x": -0.4208449050645652, "y": -0.8436696360365744, "z": -0.3333333333333333}, {"x": -0.8913832083188612, "y": -0.3071235334780821, "z": -0.3333333333333333}, {"x": -0.5202168846769621, "y": 0.7862971968574509, "z": -0.3333333333333333}, {"x": 0.179714822067371, "y": 0.925522269650051, "z": -0.3333333333333333}, {"x": 0.9410617897415274, "y": 0.05737243917912349, "z": -0.3333333333333333}, {"x": 0.7116683862514902, "y": -0.618398736171969, "z": -0.3333333333333333}, {"x": -0.6312867529967371, "y": 0.21429297686877405, "z": -0.7453559924999299}, {"x": 0.5012265383193181, "y": 0.4395638767333794, "z": -0.7453559924999299}, {"x": 0.1300602146774191, "y": -0.6538568536021535, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 46}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -0.06534476021970696, "y": 0.6634564844481312, "z": 0.7453559924999299}, {"x": -0.5418977897277435, "y": -0.38831846457853464, "z": 0.7453559924999299}, {"x": 0.6072425499474505, "y": -0.2751380198695965, "z": 0.7453559924999299}, {"x": -0.6476278327499415, "y": 0.6851766773150577, "z": 0.3333333333333333}, {"x": -0.9421538024276397, "y": 0.03514401030089004, "z": 0.3333333333333333}, {"x": -0.2695664922604821, "y": -0.9034504940168377, "z": 0.3333333333333333}, {"x": 0.44064129550238706, "y": -0.8335011323248858, "z": 0.3333333333333333}, {"x": 0.9171943250104236, "y": 0.21827381670178014, "z": 0.3333333333333333}, {"x": 0.5015125069252527, "y": 0.7983571220239959, "z": 0.3333333333333333}, {"x": -0.5015125069252527, "y": -0.7983571220239959, "z": -0.3333333333333333}, {"x": -0.9171943250104236, "y": -0.21827381670178014, "z": -0.3333333333333333}, {"x": -0.44064129550238706, "y": 0.8335011323248858, "z": -0.3333333333333333}, {"x": 0.2695664922604821, "y": 0.9034504940168377, "z": -0.3333333333333333}, {"x": 0.9421538024276397, "y": -0.03514401030089004, "z": -0.3333333333333333}, {"x": 0.6476278327499415, "y": -0.6851766773150577, "z": -0.3333333333333333}, {"x": -0.6072425499474505, "y": 0.2751380198695965, "z": -0.7453559924999299}, {"x": 0.5418977897277435, "y": 0.38831846457853464, "z": -0.7453559924999299}, {"x": 0.06534476021970696, "y": -0.6634564844481312, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 47}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": -1.224646799147353e-16, "y": 0.6666666666666666, "z": 0.7453559924999299}, {"x": -0.5773502691896256, "y": -0.3333333333333334, "z": 0.7453559924999299}, {"x": 0.5773502691896258, "y": -0.33333333333333315, "z": 0.7453559924999299}, {"x": -0.577350269189626, "y": 0.7453559924999298, "z": 0.3333333333333333}, {"x": -0.9341723589627158, "y": 0.12732200375003488, "z": 0.3333333333333333}, {"x": -0.3568220897730897, "y": -0.872677996249965, "z": 0.3333333333333333}, {"x": 0.3568220897730901, "y": -0.8726779962499648, "z": 0.3333333333333333}, {"x": 0.9341723589627157, "y": 0.12732200375003527, "z": 0.3333333333333333}, {"x": 0.5773502691896257, "y": 0.74535599249993, "z": 0.3333333333333333}, {"x": -0.5773502691896257, "y": -0.74535599249993, "z": -0.3333333333333333}, {"x": -0.9341723589627157, "y": -0.12732200375003527, "z": -0.3333333333333333}, {"x": -0.3568220897730901, "y": 0.8726779962499648, "z": -0.3333333333333333}, {"x": 0.3568220897730897, "y": 0.872677996249965, "z": -0.3333333333333333}, {"x": 0.9341723589627158, "y": -0.12732200375003488, "z": -0.3333333333333333}, {"x": 0.577350269189626, "y": -0.7453559924999298, "z": -0.3333333333333333}, {"x": -0.5773502691896258, "y": 0.33333333333333315, "z": -0.7453559924999299}, {"x": 0.5773502691896256, "y": 0.3333333333333334, "z": -0.7453559924999299}, {"x": 1.224646799147353e-16, "y": -0.6666666666666666, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 48}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.06534476021970673, "y": 0.6634564844481312, "z": 0.7453559924999299}, {"x": -0.6072425499474504, "y": -0.27513801986959674, "z": 0.7453559924999299}, {"x": 0.5418977897277436, "y": -0.38831846457853436, "z": 0.7453559924999299}, {"x": -0.501512506925253, "y": 0.7983571220239957, "z": 0.3333333333333333}, {"x": -0.9171943250104237, "y": 0.21827381670177975, "z": 0.3333333333333333}, {"x": -0.4406412955023867, "y": -0.8335011323248859, "z": 0.3333333333333333}, {"x": 0.26956649226048246, "y": -0.9034504940168376, "z": 0.3333333333333333}, {"x": 0.9421538024276396, "y": 0.03514401030089044, "z": 0.3333333333333333}, {"x": 0.6476278327499413, "y": 0.6851766773150579, "z": 0.3333333333333333}, {"x": -0.6476278327499413, "y": -0.6851766773150579, "z": -0.3333333333333333}, {"x": -0.9421538024276396, "y": -0.03514401030089044, "z": -0.3333333333333333}, {"x": -0.26956649226048246, "y": 0.9034504940168376, "z": -0.3333333333333333}, {"x": 0.4406412955023867, "y": 0.8335011323248859, "z": -0.3333333333333333}, {"x": 0.9171943250104237, "y": -0.21827381670177975, "z": -0.3333333333333333}, {"x": 0.501512506925253, "y": -0.7983571220239957, "z": -0.3333333333333333}, {"x": -0.5418977897277436, "y": 0.38831846457853436, "z": -0.7453559924999299}, {"x": 0.6072425499474504, "y": 0.27513801986959674, "z": -0.7453559924999299}, {"x": -0.06534476021970673, "y": -0.6634564844481312, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 49}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.13006021467741885, "y": 0.6538568536021536, "z": 0.7453559924999299}, {"x": -0.6312867529967371, "y": -0.21429297686877435, "z": 0.7453559924999299}, {"x": 0.5012265383193183, "y": -0.4395638767333792, "z": 0.7453559924999299}, {"x": -0.42084490506456557, "y": 0.8436696360365743, "z": 0.3333333333333333}, {"x": -0.8913832083188613, "y": 0.3071235334780817, "z": 0.3333333333333333}, {"x": -0.5202168846769619, "y": -0.7862971968574511, "z": 0.3333333333333333}, {"x": 0.1797148220673714, "y": -0.925522269650051, "z": 0.3333333333333333}, {"x": 0.9410617897415274, "y": -0.05737243917912306, "z": 0.3333333333333333}, {"x": 0.7116683862514901, "y": 0.6183987361719694, "z": 0.3333333333333333}, {"x": -0.7116683862514901, "y": -0.6183987361719694, "z": -0.3333333333333333}, {"x": -0.9410617897415274, "y": 0.05737243917912306, "z": -0.3333333333333333}, {"x": -0.1797148220673714, "y": 0.925522269650051, "z": -0.3333333333333333}, {"x": 0.5202168846769619, "y": 0.7862971968574511, "z": -0.3333333333333333}, {"x": 0.8913832083188613, "y": -0.3071235334780817, "z": -0.3333333333333333}, {"x": 0.42084490506456557, "y": -0.8436696360365743, "z": -0.3333333333333333}, {"x": -0.5012265383193183, "y": 0.4395638767333792, "z": -0.7453559924999299}, {"x": 0.6312867529967371, "y": 0.21429297686877435, "z": -0.7453559924999299}, {"x": -0.13006021467741885, "y": -0.6538568536021536, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 50}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.19352311816964135, "y": 0.6379602238214725, "z": 0.7453559924999299}, {"x": -0.6492513195182223, "y": -0.15138417535624898, "z": 0.7453559924999299}, {"x": 0.45572820134858105, "y": -0.4865760484652235, "z": 0.7453559924999299}, {"x": -0.33612433671088043, "y": 0.8808571502573841, "z": 0.3333333333333333}, {"x": -0.8569875840515605, "y": 0.3930154827361875, "z": 0.3333333333333333}, {"x": -0.5947825008726206, "y": -0.7315207895505087, "z": 0.3333333333333333}, {"x": 0.08813239989563737, "y": -0.9386807598845969, "z": 0.3333333333333333}, {"x": 0.930906837583501, "y": -0.14933636070687523, "z": 0.3333333333333333}, {"x": 0.7688551841559232, "y": 0.5456652771484094, "z": 0.3333333333333333}, {"x": -0.7688551841559232, "y": -0.5456652771484094, "z": -0.3333333333333333}, {"x": -0.930906837583501, "y": 0.14933636070687523, "z": -0.3333333333333333}, {"x": -0.08813239989563737, "y": 0.9386807598845969, "z": -0.3333333333333333}, {"x": 0.5947825008726206, "y": 0.7315207895505087, "z": -0.3333333333333333}, {"x": 0.8569875840515605, "y": -0.3930154827361875, "z": -0.3333333333333333}, {"x": 0.33612433671088043, "y": -0.8808571502573841, "z": -0.3333333333333333}, {"x": -0.45572820134858105, "y": 0.4865760484652235, "z": -0.7453559924999299}, {"x": 0.6492513195182223, "y": 0.15138417535624898, "z": -0.7453559924999299}, {"x": -0.19352311816964135, "y": -0.6379602238214725, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 51}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.25512228824339334, "y": 0.6159196883408578, "z": 0.7453559924999299}, {"x": -0.6609632409158737, "y": -0.08701746148003422, "z": 0.7453559924999299}, {"x": 0.4058409526724803, "y": -0.5289022268608234, "z": 0.7453559924999299}, {"x": -0.24816670725041562, "y": 0.9095615285957159, "z": 0.3333333333333333}, {"x": -0.8143387008727755, "y": 0.4751224780514277, "z": 0.3333333333333333}, {"x": -0.6636200364436884, "y": -0.6696994371502536, "z": 0.3333333333333333}, {"x": -0.004298785465163046, "y": -0.9427992412663542, "z": 0.3333333333333333}, {"x": 0.911786743694104, "y": -0.23986209144546225, "z": 0.3333333333333333}, {"x": 0.8186374863379384, "y": 0.46767676321492657, "z": 0.3333333333333333}, {"x": -0.8186374863379384, "y": -0.46767676321492657, "z": -0.3333333333333333}, {"x": -0.911786743694104, "y": 0.23986209144546225, "z": -0.3333333333333333}, {"x": 0.004298785465163046, "y": 0.9427992412663542, "z": -0.3333333333333333}, {"x": 0.6636200364436884, "y": 0.6696994371502536, "z": -0.3333333333333333}, {"x": 0.8143387008727755, "y": -0.4751224780514277, "z": -0.3333333333333333}, {"x": 0.24816670725041562, "y": -0.9095615285957159, "z": -0.3333333333333333}, {"x": -0.4058409526724803, "y": 0.5289022268608234, "z": -0.7453559924999299}, {"x": 0.6609632409158737, "y": 0.08701746148003422, "z": -0.7453559924999299}, {"x": -0.25512228824339334, "y": -0.6159196883408578, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 52}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.3142644912173317, "y": 0.58794750956557, "z": 0.7453559924999299}, {"x": -0.6663097249842438, "y": -0.021812721881184105, "z": 0.7453559924999299}, {"x": 0.3520452337669121, "y": -0.5661347876843859, "z": 0.7453559924999299}, {"x": -0.1578190967374083, "y": 0.929506332196762, "z": 0.3333333333333333}, {"x": -0.7638472908417697, "y": 0.5526537841746656, "z": 0.3333333333333333}, {"x": -0.7260665482921893, "y": -0.6014285130752903, "z": 0.3333333333333333}, {"x": -0.09668857117197788, "y": -0.9378380505682258, "z": 0.3333333333333333}, {"x": 0.8838856450295977, "y": -0.3280778191214716, "z": 0.3333333333333333}, {"x": 0.8605358620137478, "y": 0.38518426639356024, "z": 0.3333333333333333}, {"x": -0.8605358620137478, "y": -0.38518426639356024, "z": -0.3333333333333333}, {"x": -0.8838856450295977, "y": 0.3280778191214716, "z": -0.3333333333333333}, {"x": 0.09668857117197788, "y": 0.9378380505682258, "z": -0.3333333333333333}, {"x": 0.7260665482921893, "y": 0.6014285130752903, "z": -0.3333333333333333}, {"x": 0.7638472908417697, "y": -0.5526537841746656, "z": -0.3333333333333333}, {"x": 0.1578190967374083, "y": -0.929506332196762, "z": -0.3333333333333333}, {"x": -0.3520452337669121, "y": 0.5661347876843859, "z": -0.7453559924999299}, {"x": 0.6663097249842438, "y": 0.021812721881184105, "z": -0.7453559924999299}, {"x": -0.3142644912173317, "y": -0.58794750956557, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 53}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.37038015534640123, "y": 0.5543130748683636, "z": 0.7453559924999299}, {"x": -0.6652392821590689, "y": 0.04360208615342842, "z": 0.7453559924999299}, {"x": 0.2948591268126678, "y": -0.597915161021792, "z": 0.7453559924999299}, {"x": -0.06595160205012579, "y": 0.9404994816989058, "z": 0.3333333333333333}, {"x": -0.705999613838554, "y": 0.6248627322450121, "z": 0.3333333333333333}, {"x": -0.7815206423722874, "y": -0.5273655036451437, "z": 0.3333333333333333}, {"x": -0.18814719308305705, "y": -0.9238449667686974, "z": 0.3333333333333333}, {"x": 0.8474722444224131, "y": -0.4131339780537622, "z": 0.3333333333333333}, {"x": 0.8941468069216112, "y": 0.2989822345236854, "z": 0.3333333333333333}, {"x": -0.8941468069216112, "y": -0.2989822345236854, "z": -0.3333333333333333}, {"x": -0.8474722444224131, "y": 0.4131339780537622, "z": -0.3333333333333333}, {"x": 0.18814719308305705, "y": 0.9238449667686974, "z": -0.3333333333333333}, {"x": 0.7815206423722874, "y": 0.5273655036451437, "z": -0.3333333333333333}, {"x": 0.705999613838554, "y": -0.6248627322450121, "z": -0.3333333333333333}, {"x": 0.06595160205012579, "y": -0.9404994816989058, "z": -0.3333333333333333}, {"x": -0.2948591268126678, "y": 0.597915161021792, "z": -0.7453559924999299}, {"x": 0.6652392821590689, "y": -0.04360208615342842, "z": -0.7453559924999299}, {"x": -0.37038015534640123, "y": -0.5543130748683636, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 54}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.42292885610909703, "y": 0.5153403022418246, "z": 0.7453559924999299}, {"x": -0.6577622213899192, "y": 0.10859698226305925, "z": 0.7453559924999299}, {"x": 0.2348333652808223, "y": -0.6239372845048838, "z": 0.7453559924999299}, {"x": 0.026551042617713294, "y": 0.9424351070629751, "z": 0.3333333333333333}, {"x": -0.6413527746154256, "y": 0.691053910619124, "z": 0.3333333333333333}, {"x": -0.8294482654437003, "y": -0.4482236761275845, "z": 0.3333333333333333}, {"x": -0.2777938546730294, "y": -0.9009547509141559, "z": 0.3333333333333333}, {"x": 0.802897222825987, "y": -0.4942114309353905, "z": 0.3333333333333333}, {"x": 0.9191466292884549, "y": 0.20990084029503192, "z": 0.3333333333333333}, {"x": -0.9191466292884549, "y": -0.20990084029503192, "z": -0.3333333333333333}, {"x": -0.802897222825987, "y": 0.4942114309353905, "z": -0.3333333333333333}, {"x": 0.2777938546730294, "y": 0.9009547509141559, "z": -0.3333333333333333}, {"x": 0.8294482654437003, "y": 0.4482236761275845, "z": -0.3333333333333333}, {"x": 0.6413527746154256, "y": -0.691053910619124, "z": -0.3333333333333333}, {"x": -0.026551042617713294, "y": -0.9424351070629751, "z": -0.3333333333333333}, {"x": -0.2348333652808223, "y": 0.6239372845048838, "z": -0.7453559924999299}, {"x": 0.6577622213899192, "y": -0.10859698226305925, "z": -0.7453559924999299}, {"x": -0.42292885610909703, "y": -0.5153403022418246, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 55}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.47140452079103157, "y": 0.4714045207910318, "z": 0.7453559924999299}, {"x": -0.6439505508593788, "y": 0.172546030068347, "z": 0.7453559924999299}, {"x": 0.17254603006834734, "y": -0.6439505508593788, "z": 0.7453559924999299}, {"x": 0.11879798623086663, "y": 0.935294567158593, "z": 0.3333333333333333}, {"x": -0.5705293575736614, "y": 0.7505898620654787, "z": 0.3333333333333333}, {"x": -0.8693878482963454, "y": -0.36476520958493197, "z": 0.3333333333333333}, {"x": -0.36476520958493147, "y": -0.8693878482963457, "z": 0.3333333333333333}, {"x": 0.750589862065479, "y": -0.5705293575736609, "z": 0.3333333333333333}, {"x": 0.935294567158593, "y": 0.11879798623086707, "z": 0.3333333333333333}, {"x": -0.935294567158593, "y": -0.11879798623086707, "z": -0.3333333333333333}, {"x": -0.750589862065479, "y": 0.5705293575736609, "z": -0.3333333333333333}, {"x": 0.36476520958493147, "y": 0.8693878482963457, "z": -0.3333333333333333}, {"x": 0.8693878482963454, "y": 0.36476520958493197, "z": -0.3333333333333333}, {"x": 0.5705293575736614, "y": -0.7505898620654787, "z": -0.3333333333333333}, {"x": -0.11879798623086663, "y": -0.935294567158593, "z": -0.3333333333333333}, {"x": -0.17254603006834734, "y": 0.6439505508593788, "z": -0.7453559924999299}, {"x": 0.6439505508593788, "y": -0.172546030068347, "z": -0.7453559924999299}, {"x": -0.47140452079103157, "y": -0.4714045207910318, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 56}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.5153403022418244, "y": 0.42292885610909725, "z": 0.7453559924999299}, {"x": -0.6239372845048838, "y": 0.234833365280822, "z": 0.7453559924999299}, {"x": 0.10859698226305953, "y": -0.6577622213899192, "z": 0.7453559924999299}, {"x": 0.20990084029503164, "y": 0.9191466292884551, "z": 0.3333333333333333}, {"x": -0.4942114309353909, "y": 0.8028972228259869, "z": 0.3333333333333333}, {"x": -0.9009547509141558, "y": -0.27779385467302975, "z": 0.3333333333333333}, {"x": -0.4482236761275842, "y": -0.8294482654437005, "z": 0.3333333333333333}, {"x": 0.6910539106191242, "y": -0.6413527746154252, "z": 0.3333333333333333}, {"x": 0.9424351070629752, "y": 0.026551042617713627, "z": 0.3333333333333333}, {"x": -0.9424351070629752, "y": -0.026551042617713627, "z": -0.3333333333333333}, {"x": -0.6910539106191242, "y": 0.6413527746154252, "z": -0.3333333333333333}, {"x": 0.4482236761275842, "y": 0.8294482654437005, "z": -0.3333333333333333}, {"x": 0.9009547509141558, "y": 0.27779385467302975, "z": -0.3333333333333333}, {"x": 0.4942114309353909, "y": -0.8028972228259869, "z": -0.3333333333333333}, {"x": -0.20990084029503164, "y": -0.9191466292884551, "z": -0.3333333333333333}, {"x": -0.10859698226305953, "y": 0.6577622213899192, "z": -0.7453559924999299}, {"x": 0.6239372845048838, "y": -0.234833365280822, "z": -0.7453559924999299}, {"x": -0.5153403022418244, "y": -0.42292885610909725, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 57}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.5543130748683635, "y": 0.37038015534640145, "z": 0.7453559924999299}, {"x": -0.5979151610217921, "y": 0.2948591268126675, "z": 0.7453559924999299}, {"x": 0.043602086153428754, "y": -0.6652392821590689, "z": 0.7453559924999299}, {"x": 0.29898223452368505, "y": 0.8941468069216112, "z": 0.3333333333333333}, {"x": -0.41313397805376256, "y": 0.847472244422413, "z": 0.3333333333333333}, {"x": -0.9238449667686973, "y": -0.1881471930830575, "z": 0.3333333333333333}, {"x": -0.5273655036451433, "y": -0.7815206423722876, "z": 0.3333333333333333}, {"x": 0.6248627322450123, "y": -0.7059996138385536, "z": 0.3333333333333333}, {"x": 0.9404994816989061, "y": -0.06595160205012546, "z": 0.3333333333333333}, {"x": -0.9404994816989061, "y": 0.06595160205012546, "z": -0.3333333333333333}, {"x": -0.6248627322450123, "y": 0.7059996138385536, "z": -0.3333333333333333}, {"x": 0.5273655036451433, "y": 0.7815206423722876, "z": -0.3333333333333333}, {"x": 0.9238449667686973, "y": 0.1881471930830575, "z": -0.3333333333333333}, {"x": 0.41313397805376256, "y": -0.847472244422413, "z": -0.3333333333333333}, {"x": -0.29898223452368505, "y": -0.8941468069216112, "z": -0.3333333333333333}, {"x": -0.043602086153428754, "y": 0.6652392821590689, "z": -0.7453559924999299}, {"x": 0.5979151610217921, "y": -0.2948591268126675, "z": -0.7453559924999299}, {"x": -0.5543130748683635, "y": -0.37038015534640145, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 58}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.5879475095655698, "y": 0.3142644912173319, "z": 0.7453559924999299}, {"x": -0.566134787684386, "y": 0.3520452337669118, "z": 0.7453559924999299}, {"x": -0.021812721881183827, "y": -0.6663097249842437, "z": 0.7453559924999299}, {"x": 0.38518426639355996, "y": 0.8605358620137478, "z": 0.3333333333333333}, {"x": -0.3280778191214721, "y": 0.8838856450295975, "z": 0.3333333333333333}, {"x": -0.9378380505682258, "y": -0.09668857117197832, "z": 0.3333333333333333}, {"x": -0.6014285130752901, "y": -0.7260665482921895, "z": 0.3333333333333333}, {"x": 0.5526537841746659, "y": -0.7638472908417694, "z": 0.3333333333333333}, {"x": 0.9295063321967622, "y": -0.15781909673740785, "z": 0.3333333333333333}, {"x": -0.9295063321967622, "y": 0.15781909673740785, "z": -0.3333333333333333}, {"x": -0.5526537841746659, "y": 0.7638472908417694, "z": -0.3333333333333333}, {"x": 0.6014285130752901, "y": 0.7260665482921895, "z": -0.3333333333333333}, {"x": 0.9378380505682258, "y": 0.09668857117197832, "z": -0.3333333333333333}, {"x": 0.3280778191214721, "y": -0.8838856450295975, "z": -0.3333333333333333}, {"x": -0.38518426639355996, "y": -0.8605358620137478, "z": -0.3333333333333333}, {"x": 0.021812721881183827, "y": 0.6663097249842437, "z": -0.7453559924999299}, {"x": 0.566134787684386, "y": -0.3520452337669118, "z": -0.7453559924999299}, {"x": -0.5879475095655698, "y": -0.3142644912173319, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 59}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6159196883408576, "y": 0.25512228824339356, "z": 0.7453559924999299}, {"x": -0.5289022268608237, "y": 0.40584095267248005, "z": 0.7453559924999299}, {"x": -0.08701746148003389, "y": -0.6609632409158737, "z": 0.7453559924999299}, {"x": 0.46767676321492635, "y": 0.8186374863379386, "z": 0.3333333333333333}, {"x": -0.23986209144546278, "y": 0.911786743694104, "z": 0.3333333333333333}, {"x": -0.9427992412663542, "y": -0.0042987854651634905, "z": 0.3333333333333333}, {"x": -0.6696994371502533, "y": -0.6636200364436886, "z": 0.3333333333333333}, {"x": 0.47512247805142804, "y": -0.8143387008727752, "z": 0.3333333333333333}, {"x": 0.9095615285957162, "y": -0.24816670725041517, "z": 0.3333333333333333}, {"x": -0.9095615285957162, "y": 0.24816670725041517, "z": -0.3333333333333333}, {"x": -0.47512247805142804, "y": 0.8143387008727752, "z": -0.3333333333333333}, {"x": 0.6696994371502533, "y": 0.6636200364436886, "z": -0.3333333333333333}, {"x": 0.9427992412663542, "y": 0.0042987854651634905, "z": -0.3333333333333333}, {"x": 0.23986209144546278, "y": -0.911786743694104, "z": -0.3333333333333333}, {"x": -0.46767676321492635, "y": -0.8186374863379386, "z": -0.3333333333333333}, {"x": 0.08701746148003389, "y": 0.6609632409158737, "z": -0.7453559924999299}, {"x": 0.5289022268608237, "y": -0.40584095267248005, "z": -0.7453559924999299}, {"x": -0.6159196883408576, "y": -0.25512228824339356, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 60}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6379602238214725, "y": 0.19352311816964166, "z": 0.7453559924999299}, {"x": -0.48657604846522384, "y": 0.4557282013485808, "z": 0.7453559924999299}, {"x": -0.15138417535624868, "y": -0.6492513195182223, "z": 0.7453559924999299}, {"x": 0.5456652771484091, "y": 0.7688551841559235, "z": 0.3333333333333333}, {"x": -0.14933636070687573, "y": 0.9309068375835011, "z": 0.3333333333333333}, {"x": -0.938680759884597, "y": 0.08813239989563693, "z": 0.3333333333333333}, {"x": -0.7315207895505085, "y": -0.5947825008726211, "z": 0.3333333333333333}, {"x": 0.39301548273618797, "y": -0.8569875840515602, "z": 0.3333333333333333}, {"x": 0.8808571502573842, "y": -0.33612433671088, "z": 0.3333333333333333}, {"x": -0.8808571502573842, "y": 0.33612433671088, "z": -0.3333333333333333}, {"x": -0.39301548273618797, "y": 0.8569875840515602, "z": -0.3333333333333333}, {"x": 0.7315207895505085, "y": 0.5947825008726211, "z": -0.3333333333333333}, {"x": 0.938680759884597, "y": -0.08813239989563693, "z": -0.3333333333333333}, {"x": 0.14933636070687573, "y": -0.9309068375835011, "z": -0.3333333333333333}, {"x": -0.5456652771484091, "y": -0.7688551841559235, "z": -0.3333333333333333}, {"x": 0.15138417535624868, "y": 0.6492513195182223, "z": -0.7453559924999299}, {"x": 0.48657604846522384, "y": -0.4557282013485808, "z": -0.7453559924999299}, {"x": -0.6379602238214725, "y": -0.19352311816964166, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 61}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6538568536021535, "y": 0.13006021467741913, "z": 0.7453559924999299}, {"x": -0.43956387673337943, "y": 0.501226538319318, "z": 0.7453559924999299}, {"x": -0.21429297686877402, "y": -0.6312867529967372, "z": 0.7453559924999299}, {"x": 0.618398736171969, "y": 0.7116683862514902, "z": 0.3333333333333333}, {"x": -0.05737243917912355, "y": 0.9410617897415274, "z": 0.3333333333333333}, {"x": -0.925522269650051, "y": 0.17971482206737094, "z": 0.3333333333333333}, {"x": -0.7862971968574508, "y": -0.5202168846769623, "z": 0.3333333333333333}, {"x": 0.3071235334780821, "y": -0.8913832083188612, "z": 0.3333333333333333}, {"x": 0.8436696360365744, "y": -0.4208449050645652, "z": 0.3333333333333333}, {"x": -0.8436696360365744, "y": 0.4208449050645652, "z": -0.3333333333333333}, {"x": -0.3071235334780821, "y": 0.8913832083188612, "z": -0.3333333333333333}, {"x": 0.7862971968574508, "y": 0.5202168846769623, "z": -0.3333333333333333}, {"x": 0.925522269650051, "y": -0.17971482206737094, "z": -0.3333333333333333}, {"x": 0.05737243917912355, "y": -0.9410617897415274, "z": -0.3333333333333333}, {"x": -0.618398736171969, "y": -0.7116683862514902, "z": -0.3333333333333333}, {"x": 0.21429297686877402, "y": 0.6312867529967372, "z": -0.7453559924999299}, {"x": 0.43956387673337943, "y": -0.501226538319318, "z": -0.7453559924999299}, {"x": -0.6538568536021535, "y": -0.13006021467741913, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 62}, {"vertices": [{"x": 0.0, "y": 0.0, "z": 1.0}, {"x": 0.6634564844481312, "y": 0.065344760219707, "z": 0.7453559924999299}, {"x": -0.3883184645785347, "y": 0.5418977897277435, "z": 0.7453559924999299}, {"x": -0.27513801986959646, "y": -0.6072425499474505, "z": 0.7453559924999299}, {"x": 0.6851766773150577, "y": 0.6476278327499416, "z": 0.3333333333333333}, {"x": 0.03514401030088998, "y": 0.9421538024276397, "z": 0.3333333333333333}, {"x": -0.9034504940168377, "y": 0.26956649226048207, "z": 0.3333333333333333}, {"x": -0.8335011323248858, "y": -0.44064129550238706, "z": 0.3333333333333333}, {"x": 0.2182738167017802, "y": -0.9171943250104236, "z": 0.3333333333333333}, {"x": 0.7983571220239959, "y": -0.5015125069252526, "z": 0.3333333333333333}, {"x": -0.7983571220239959, "y": 0.5015125069252526, "z": -0.3333333333333333}, {"x": -0.2182738167017802, "y": 0.9171943250104236, "z": -0.3333333333333333}, {"x": 0.8335011323248858, "y": 0.44064129550238706, "z": -0.3333333333333333}, {"x": 0.9034504940168377, "y": -0.26956649226048207, "z": -0.3333333333333333}, {"x": -0.03514401030088998, "y": -0.9421538024276397, "z": -0.3333333333333333}, {"x": -0.6851766773150577, "y": -0.6476278327499416, "z": -0.3333333333333333}, {"x": 0.27513801986959646, "y": 0.6072425499474505, "z": -0.7453559924999299}, {"x": 0.3883184645785347, "y": -0.5418977897277435, "z": -0.7453559924999299}, {"x": -0.6634564844481312, "y": -0.065344760219707, "z": -0.7453559924999299}, {"x": 0.0, "y": 0.0, "z": -1.0}], "faces": [[0, 1, 4, 5, 2], [0, 2, 6, 7, 3], [0, 3, 8, 9, 1], [1, 9, 13, 12, 4], [2, 5, 11, 10, 6], [3, 7, 15, 14, 8], [17, 14, 15, 18, 19], [16, 12, 13, 17, 19], [18, 10, 11, 16, 19], [15, 7, 6, 10, 18], [13, 9, 8, 14, 17], [11, 5, 4, 12, 16]], "color": "#6666ff", "opacity": 1.0, "useFlatShading": true, "keyframe": 63}];
+    for ( var i=0 ; i < surfaces.length ; i++ ) addSurface( surfaces[i] );
+
+    function addSurface( json ) {
+
+        var useFaceColors = 'faceColors' in json ? true : false;
+
+        var geometry = new THREE.Geometry();
+        for ( var i=0 ; i < json.vertices.length ; i++ ) {
+            var v = json.vertices[i];
+            geometry.vertices.push( new THREE.Vector3( a[0]*v.x, a[1]*v.y, a[2]*v.z ) );
+        }
+        for ( var i=0 ; i < json.faces.length ; i++ ) {
+            var f = json.faces[i];
+            for ( var j=0 ; j < f.length - 2 ; j++ ) {
+                var face = new THREE.Face3( f[0], f[j+1], f[j+2] );
+                if ( useFaceColors ) face.color.set( json.faceColors[i] );
+                geometry.faces.push( face );
+            }
+        }
+        geometry.computeVertexNormals();
+
+        var side = json.singleSide ? THREE.FrontSide : THREE.DoubleSide;
+        var transparent = json.opacity < 1 ? true : false;
+        var flatShading = json.useFlatShading ? json.useFlatShading : false;
+
+        var material = new THREE.MeshPhongMaterial( { side: side,
+                                     color: useFaceColors ? 'white' : json.color,
+                                     vertexColors: useFaceColors ? THREE.FaceColors : THREE.NoColors,
+                                     transparent: transparent, opacity: json.opacity,
+                                     shininess: 20, flatShading: flatShading } );
+
+        var c = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter( c );
+        geometry.translate( -c.x, -c.y, -c.z );
+
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set( c.x, c.y, c.z );
+        if ( transparent && json.renderOrder ) mesh.renderOrder = json.renderOrder;
+        mesh.userData = json;
+        scene.add( mesh );
+
+        if ( json.showMeshGrid ) {
+
+            var geometry = new THREE.Geometry();
+
+            for ( var i=0 ; i < json.faces.length ; i++ ) {
+                var f = json.faces[i];
+                for ( var j=0 ; j < f.length ; j++ ) {
+                    var k = j === f.length-1 ? 0 : j+1;
+                    var v1 = json.vertices[f[j]];
+                    var v2 = json.vertices[f[k]];
+                    // vertices in opposite directions on neighboring faces
+                    var nudge = f[j] < f[k] ? .0005*zRange : -.0005*zRange;
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v1.x, a[1]*v1.y, a[2]*(v1.z+nudge) ) );
+                    geometry.vertices.push( new THREE.Vector3( a[0]*v2.x, a[1]*v2.y, a[2]*(v2.z+nudge) ) );
+                }
+            }
+
+            var gridColor = ( options.theme === 'dark' ) ? 'white' : 'black';
+            var material = new THREE.LineBasicMaterial( { color: gridColor, linewidth: 1 } );
+
+            var c = new THREE.Vector3();
+            geometry.computeBoundingBox();
+            geometry.boundingBox.getCenter( c );
+            geometry.translate( -c.x, -c.y, -c.z );
+
+            var mesh = new THREE.LineSegments( geometry, material );
+            mesh.position.set( c.x, c.y, c.z );
+            mesh.userData = json;
+            scene.add( mesh );
+
+        }
+
+    }
+
+    function render() {
+
+        if ( window.updateAnimation ) animate = updateAnimation();
+        if ( animate ) requestAnimationFrame( render );
+
+        renderer.render( scene, camera );
+
+    }
+
+    render();
+    controls.update();
+    if ( !animate ) render();
+
+
+    // menu functions
+
+    function toggleMenu() {
+
+        var m = document.getElementById( 'menu-content' );
+        if ( m.style.display === 'block' ) m.style.display = 'none'
+        else m.style.display = 'block';
+
+    }
+
+
+    function saveAsPNG() {
+
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = renderer.domElement.toDataURL( 'image/png' );
+        a.download = 'screenshot';
+        a.click();
+
+    }
+
+    function saveAsHTML() {
+
+        toggleMenu(); // otherwise visible in output
+        event.stopPropagation();
+
+        var blob = new Blob( [ '<!DOCTYPE html>\n' + document.documentElement.outerHTML ] );
+        var a = document.body.appendChild( document.createElement( 'a' ) );
+        a.href = window.URL.createObjectURL( blob );
+        a.download = 'graphic.html';
+        a.click();
+
+    }
+
+    function getViewpoint() {
+
+        function roundTo( x, n ) { return +x.toFixed(n); }
+
+        var v = camera.quaternion.inverse();
+        var r = Math.sqrt( v.x*v.x + v.y*v.y + v.z*v.z );
+        var axis = [ roundTo( v.x / r, 4 ), roundTo( v.y / r, 4 ), roundTo( v.z / r, 4 ) ];
+        var angle = roundTo( 2 * Math.atan2( r, v.w ) * 180 / Math.PI, 2 );
+
+        var textArea = document.createElement( 'textarea' );
+        textArea.textContent = JSON.stringify( axis ) + ',' + angle;
+        textArea.style.csstext = 'position: absolute; top: -100%';
+        document.body.append( textArea );
+        textArea.select();
+        document.execCommand( 'copy' );
+
+        var m = document.getElementById( 'menu-message' );
+        m.innerHTML = 'Viewpoint copied to clipboard';
+        m.style.display = 'block';
+        setTimeout( function() { m.style.display = 'none'; }, 2000 );
+
+    }
+
+</script><canvas width="3840" height="1875" style="width: 1536px; height: 750px;" tabindex="0"></canvas>
+
+<div id="menu-container" onclick="toggleMenu()">ⓘ
+<div id="menu-message"></div>
+<div id="menu-content" style="display: none;">
+<div onclick="saveAsPNG()">Save as PNG</div>
+<div onclick="saveAsHTML()">Save as HTML</div>
+<div onclick="getViewpoint()">Get Viewpoint</div>
+<div>Close Menu</div>
+</div></div>
+
+<!-- animation.html -->
+
+<!--
+SVG icons by Google
+"Icons - Material Design"
+    https://material.io/resources/icons/
+    Retrieved April 24, 2020
+Apache license version 2.0
+    https://www.apache.org/licenses/LICENSE-2.0.html
+-->
+
+<div id="animation-ui" class="playing loop">
+
+    <input class="slider" type="range" min="0" max="320" value="0" step="any">
+    <div class="tick-marks"></div>
+
+    <div class="buttons">
+
+        <button class="play-pause" title="Play/pause">
+            <!-- play_arrow -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="play" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M8 5v14l11-7z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+            </svg>
+            <!-- pause -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="pause" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+            </svg>
+        </button>
+
+        <button class="previous" title="Go to previous frame">
+            <!-- skip_previous -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+            </svg>
+        </button>
+        <button class="next" title="Go to next frame">
+            <!-- skip_next -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+            </svg>
+        </button>
+
+        <button class="slower" title="Decrease playback speed">
+            <!-- switch_right -->
+            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" fill="#3131ff" width="24" height="24">
+                <rect fill="none" width="24" height="24" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 24 24)"></rect>
+                <path d="M15.5,15.38V8.62L18.88,12L15.5,15.38 M14,19l7-7l-7-7V19L14,19z M10,19V5l-7,7L10,19z"></path>
+            </svg>
+        </button>
+        <button class="faster" title="Increase playback speed">
+            <!-- switch_left -->
+            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" fill="#3131ff" width="24" height="24">
+                <rect fill="none" height="24" width="24"></rect>
+                <path d="M8.5,8.62v6.76L5.12,12L8.5,8.62 M10,5l-7,7l7,7V5L10,5z M14,5v14l7-7L14,5z"></path>
+            </svg>
+        </button>
+
+        <button class="toggle-loop" title="Toggle looping">
+            <!-- sync_disabled -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="once" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M0 0h24v24H0zm0 0h24v24H0z" fill="none"></path>
+                <path d="M10 6.35V4.26c-.8.21-1.55.54-2.23.96l1.46 1.46c.25-.12.5-.24.77-.33zm-7.14-.94l2.36 2.36C4.45 8.99 4 10.44 4 12c0 2.21.91 4.2 2.36 5.64L4 20h6v-6l-2.24 2.24C6.68 15.15 6 13.66 6 12c0-1 .25-1.94.68-2.77l8.08 8.08c-.25.13-.5.25-.77.34v2.09c.8-.21 1.55-.54 2.23-.96l2.36 2.36 1.27-1.27L4.14 4.14 2.86 5.41zM20 4h-6v6l2.24-2.24C17.32 8.85 18 10.34 18 12c0 1-.25 1.94-.68 2.77l1.46 1.46C19.55 15.01 20 13.56 20 12c0-2.21-.91-4.2-2.36-5.64L20 4z"></path>
+            </svg>
+            <!-- sync -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="loop" viewBox="0 0 24 24" fill="#3131ff" width="24px" height="24px">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+            </svg>
+        </button>
+
+    </div>
+
+</div>
+<script>// animation.js
+
+window.updateAnimation = (function() {
+
+    var frameDuration = options.delay;
+    var frameCount, totalDuration;
+    var mixer, action, clock;
+    var ui, slider;
+
+    init();
+    options.animationControls && initUI();
+    options.autoPlay && play();
+    return update;
+
+    function init() {
+
+        var frames = partitionScene();
+        frameCount = frames.length;
+        totalDuration = frameCount * frameDuration;
+
+        var tracks = createTracks( frames );
+        var clip = new THREE.AnimationClip( 'sage_animation', totalDuration, tracks );
+
+        mixer = new THREE.AnimationMixer( scene );
+        mixer.addEventListener( 'finished', function() { pause(); } );
+
+        action = mixer.clipAction( clip );
+        action.timeScale = 100; // Our times are in hundredths of a second.
+        action.clampWhenFinished = true; // Sets paused=true instead of disabling.
+        action.loop = options.loop ? THREE.LoopRepeat : THREE.LoopOnce;
+
+        // We start/stop the clock to play/pause. The action's `paused` property
+        // is instead used to determine if the animation has finished.
+        action.play();
+
+        clock = new THREE.Clock( false ); // Don't start playing yet.
+
+    }
+
+    // Group objects in by keyframe. The result is a potentially sparse list of
+    // lists of objects. Assumes keyframe index specified in objects' user data.
+    function partitionScene() {
+        var frames = [];
+        for ( var i=0 ; i < scene.children.length ; i++) {
+            var obj = scene.children[i];
+            var k = obj.userData && parseInt( obj.userData.keyframe );
+            if ( k >= 0 ){
+                if ( k in frames ) frames[k].push( obj );
+                else frames[k] = [obj];
+            }
+        }
+        return frames;
+    }
+
+    // Create and return a list of keyframe tracks to animate objects'
+    // visibility depending on which keyframe they appear in.
+    function createTracks( frames ) {
+        var tracks = [];
+        for ( var keyframe=0 ; keyframe < frames.length ; keyframe++ ) {
+            var frame = frames[keyframe];
+            if ( frame ) {
+                // Show during the frame.
+                var times = [keyframe * frameDuration];
+                var values = [true];
+                // For all but the first frame, start off hidden.
+                if ( keyframe > 0 ) {
+                    times.unshift( 0 );
+                    values.unshift( false );
+                }
+                // For all but the last frame, end up hidden.
+                if ( keyframe < frames.length - 1 ) {
+                    times.push( ( keyframe + 1 ) * frameDuration );
+                    values.push( false );
+                }
+                for ( var i=0; i < frame.length ; i++ ) {
+                    var binding = frame[i].uuid + '.visible';
+                    var track = new THREE.BooleanKeyframeTrack( binding, times, values );
+                    tracks.push( track );
+                }
+            }
+        }
+        return tracks;
+    }
+
+    function initUI() {
+
+        ui = document.getElementById( 'animation-ui' );
+
+        initSlider();
+
+        hookupButton( 'play-pause', togglePlayback );
+        hookupButton( 'previous', gotoPreviousFrame );
+        hookupButton( 'next', gotoNextFrame );
+        hookupButton( 'slower', slowDown );
+        hookupButton( 'faster', speedUp );
+        hookupButton( 'toggle-loop', toggleLooping );
+
+        function hookupButton( _class, onclick ) {
+            var button = ui.getElementsByClassName( _class )[0];
+            button.addEventListener( 'click', onclick );
+            return button;
+        }
+
+    }
+
+    function initSlider() {
+
+        slider = ui.getElementsByClassName( 'slider' )[0];
+        slider.value = action.time;
+        slider.setAttribute( 'max', totalDuration );
+        slider.addEventListener( 'change', change );
+        slider.addEventListener( 'input', change );
+        slider.addEventListener( 'mousedown', mousedown );
+        slider.addEventListener( 'mouseup', mouseup );
+        slider.addEventListener( 'keydown', keydown );
+
+        function change() {
+            // Keep animation in sync with position of the knob.
+            seek( parseFloat( slider.value ) );
+        }
+
+        // Temporarily pause playback while the knob is being dragged around.
+        var dragging = false;
+        var wasPlaying = false;
+        function mousedown( event ) {
+            if ( event.button === 0 && !dragging ) {
+                dragging = true;
+                wasPlaying = isPlaying();
+                pause();
+            }
+        }
+        function mouseup( event ) {
+            if ( event.button === 0 && dragging ) {
+                dragging = false;
+                if ( wasPlaying && !isFinished() ) play();
+            }
+        }
+
+        function keydown( event ) {
+            switch ( event.key ) {
+                // Toggle playback using spacebar/enter.
+                case ' ':
+                case 'Enter':
+                    if ( !event.repeat ) {
+                        togglePlayback();
+                        event.preventDefault();
+                    }
+                    break;
+                // Adjust speed using up/down arrows.
+                case 'Down':
+                case 'ArrowDown':
+                    slowDown();
+                    event.preventDefault();
+                    break;
+                case 'Up':
+                case 'ArrowUp':
+                    speedUp();
+                    event.preventDefault();
+                    break;
+                // Navigate frame-by-frame using left/right arrows.
+                case 'Left':
+                case 'ArrowLeft':
+                    gotoPreviousFrame();
+                    event.preventDefault();
+                    break;
+                case 'Right':
+                case 'ArrowRight':
+                    gotoNextFrame();
+                    event.preventDefault();
+                    break;
+            }
+        }
+
+    }
+
+    function isPlaying() {
+        return clock.running;
+    }
+
+    function isFinished() {
+        return action.paused;
+    }
+
+    function play() {
+        if ( isFinished() ) action.reset(); // Return to the beginning.
+        clock.start();
+        updateUI();
+        requestAnimationFrame( render ); // Re-enter render loop.
+    }
+
+    function pause() {
+        clock.stop();
+        updateUI();
+    }
+
+    function togglePlayback() {
+        isPlaying() ? pause() : play();
+    }
+
+    function seek( time ) {
+
+        // Ensure time is in range: [0, totalDuration].
+        time = Math.max( 0, Math.min( totalDuration, time ) );
+        action.time = time;
+
+        // Make sure the animation is treated as finished if set to the very
+        // end of the animation.
+        action.paused = ( !isLooping() && time == totalDuration );
+
+        updateUI();
+
+        if ( !isPlaying() ) {
+            // Ensure the animation gets re-rendered at the new position.
+            requestAnimationFrame( render ); // Trigger a re-render.
+        }
+
+    }
+
+    function moveKeyframes( delta ) {
+        var keyframe = Math.floor( action.time / frameDuration );
+        keyframe += delta;
+        // Ensure keyframe is in range: [0, frameCount].
+        keyframe = Math.max( 0, Math.min( frameCount, keyframe ) );
+        seek( keyframe * frameDuration );
+    }
+
+    function gotoPreviousFrame() {
+        pause();
+        moveKeyframes( -1 );
+    }
+
+    function gotoNextFrame() {
+        pause();
+        moveKeyframes( +1 );
+    }
+
+    function speedUp() {
+        action.timeScale *= 1.25;
+    }
+
+    function slowDown() {
+        action.timeScale /= 1.25;
+    }
+
+    function isLooping() {
+        return action.loop === THREE.LoopRepeat;
+    }
+
+    function setLooping( looping ) {
+        action.loop = looping ? THREE.LoopRepeat : THREE.LoopOnce;
+        updateUI();
+    }
+
+    function toggleLooping() {
+        setLooping( !isLooping() );
+    }
+
+    function update() {
+        mixer.update( clock.getDelta() );
+        updateUI();
+        return clock.running; // Should exit render loop if false.
+    }
+
+    function updateUI() {
+        if ( ui ) {
+            ui.classList.remove( 'playing', 'paused', 'once', 'loop' );
+            ui.classList.add( isPlaying() ? 'playing' : 'paused' );
+            ui.classList.add( isLooping() ? 'loop' : 'once' );
+        }
+        if ( slider ) slider.value = action.time;
+    }
+
+})();
+</script>
+
+
+</body></html>

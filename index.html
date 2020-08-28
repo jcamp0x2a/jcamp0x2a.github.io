@@ -12,6 +12,11 @@ text = text3d("Hello world!", (1, 1, 1), color='yellow')
 show(surface + curve + points + text, theme='dark')
 </pre>
 
+<h3><a href="dark_theme_anim.html">Dark theme animation</a></h3>
+<pre>
+animate([dodecahedron().rotateZ(t*pi/32) for t in range(0, 64)]).interactive(delay=5, theme='dark')
+</pre>
+
 <hr/>
 
 <h3><a href="simpler.html">New, simpler version of the animation branch</a></h3>
